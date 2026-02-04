@@ -7,26 +7,33 @@ namespace TabularForge.UI.Views;
 
 public partial class MainWindow : Window
 {
-    private readonly MainViewModel _viewModel;
+    private MainViewModel? _viewModel;
 
     public MainWindow()
     {
         InitializeComponent();
 
-        _viewModel = (MainViewModel)DataContext;
-
-        // Subscribe to document tab changes to sync with AvalonDock
-        _viewModel.DocumentTabs.CollectionChanged += DocumentTabs_CollectionChanged;
-
         // Wire up the DockManager active content changed
         DockManager.ActiveContentChanged += DockManager_ActiveContentChanged;
+
+        // Subscribe to DataContext changes to wire up ViewModel when it's set
+        DataContextChanged += MainWindow_DataContextChanged;
     }
 
-    public MainWindow(MainViewModel viewModel) : this()
+    private void MainWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        DataContext = viewModel;
-        _viewModel = viewModel;
-        _viewModel.DocumentTabs.CollectionChanged += DocumentTabs_CollectionChanged;
+        // Unsubscribe from old ViewModel if any
+        if (_viewModel != null)
+        {
+            _viewModel.DocumentTabs.CollectionChanged -= DocumentTabs_CollectionChanged;
+        }
+
+        // Subscribe to new ViewModel
+        _viewModel = DataContext as MainViewModel;
+        if (_viewModel != null)
+        {
+            _viewModel.DocumentTabs.CollectionChanged += DocumentTabs_CollectionChanged;
+        }
     }
 
     private void DocumentTabs_CollectionChanged(object? sender,
