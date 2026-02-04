@@ -1,12 +1,8 @@
-using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Xml;
 using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
 using TabularForge.Core.Models;
 using TabularForge.DAXParser.Formatter;
@@ -46,21 +42,15 @@ public partial class DaxScriptingPanel : UserControl
 
     private void LoadDaxHighlighting()
     {
-        try
+        // Use globally registered DAX highlighting from App.OnStartup
+        var definition = HighlightingManager.Instance.GetDefinition("DAX");
+        if (definition != null)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "TabularForge.UI.SyntaxHighlighting.DAX.xshd";
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream != null)
-            {
-                using var reader = new XmlTextReader(stream);
-                var highlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-                ScriptEditor.SyntaxHighlighting = highlighting;
-            }
+            ScriptEditor.SyntaxHighlighting = definition;
         }
-        catch (Exception ex)
+        else
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to load DAX highlighting: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine("DAX highlighting not found in HighlightingManager. Was RegisterDaxHighlighting() called in App.OnStartup?");
         }
     }
 

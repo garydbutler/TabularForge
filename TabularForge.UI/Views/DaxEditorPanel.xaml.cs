@@ -515,34 +515,15 @@ public partial class DaxEditorPanel : UserControl
 
     private void LoadDaxHighlighting()
     {
-        try
+        // Use globally registered DAX highlighting from App.OnStartup
+        var definition = HighlightingManager.Instance.GetDefinition("DAX");
+        if (definition != null)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "TabularForge.UI.SyntaxHighlighting.DAX.xshd";
-
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream != null)
-            {
-                using var reader = new XmlTextReader(stream);
-                var highlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-                DaxEditor.SyntaxHighlighting = highlighting;
-            }
-            else
-            {
-                var dir = Path.GetDirectoryName(assembly.Location) ?? ".";
-                var xshdPath = Path.Combine(dir, "SyntaxHighlighting", "DAX.xshd");
-                if (File.Exists(xshdPath))
-                {
-                    using var fileStream = File.OpenRead(xshdPath);
-                    using var reader = new XmlTextReader(fileStream);
-                    var highlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-                    DaxEditor.SyntaxHighlighting = highlighting;
-                }
-            }
+            DaxEditor.SyntaxHighlighting = definition;
         }
-        catch (Exception ex)
+        else
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to load DAX highlighting: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine("DAX highlighting not found in HighlightingManager. Was RegisterDaxHighlighting() called in App.OnStartup?");
         }
     }
 

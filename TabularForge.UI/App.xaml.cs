@@ -1,4 +1,8 @@
+using System.Reflection;
 using System.Windows;
+using System.Xml;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Microsoft.Extensions.DependencyInjection;
 using TabularForge.Core.Commands;
 using TabularForge.Core.Services;
@@ -14,6 +18,9 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // Register DAX syntax highlighting globally BEFORE any UI is created
+        RegisterDaxHighlighting();
 
         // Configure DI
         var services = new ServiceCollection();
@@ -62,6 +69,41 @@ public partial class App : Application
         // ViewModels
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<ErrorListViewModel>();
+    }
+
+    private static void RegisterDaxHighlighting()
+    {
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "TabularForge.UI.SyntaxHighlighting.DAX.xshd";
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream != null)
+            {
+                using var reader = new XmlTextReader(stream);
+                var definition = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                HighlightingManager.Instance.RegisterHighlighting(
+                    "DAX", new[] { ".dax", ".msdax" }, definition);
+            }
+            else
+            {
+                // Fallback: try loading from file next to exe
+                var dir = System.IO.Path.GetDirectoryName(assembly.Location) ?? ".";
+                var xshdPath = System.IO.Path.Combine(dir, "SyntaxHighlighting", "DAX.xshd");
+                if (System.IO.File.Exists(xshdPath))
+                {
+                    using var fileStream = System.IO.File.OpenRead(xshdPath);
+                    using var reader = new XmlTextReader(fileStream);
+                    var definition = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                    HighlightingManager.Instance.RegisterHighlighting(
+                        "DAX", new[] { ".dax", ".msdax" }, definition);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"DAX highlighting registration failed: {ex.Message}");
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)

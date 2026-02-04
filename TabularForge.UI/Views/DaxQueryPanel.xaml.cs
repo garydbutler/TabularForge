@@ -1,5 +1,6 @@
 using System.Windows.Controls;
 using System.Windows.Input;
+using ICSharpCode.AvalonEdit.Highlighting;
 using TabularForge.UI.ViewModels;
 
 namespace TabularForge.UI.Views;
@@ -9,6 +10,11 @@ public partial class DaxQueryPanel : UserControl
     public DaxQueryPanel()
     {
         InitializeComponent();
+
+        // Apply DAX syntax highlighting from global registration
+        var daxHighlighting = HighlightingManager.Instance.GetDefinition("DAX");
+        if (daxHighlighting != null)
+            QueryEditor.SyntaxHighlighting = daxHighlighting;
 
         DataContextChanged += (s, e) =>
         {
