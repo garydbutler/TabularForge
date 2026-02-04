@@ -1,0 +1,104 @@
+<UserControl x:Class="TabularForge.UI.Views.DaxQueryPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             Background="{DynamicResource EditorBackground}"
+             Foreground="{DynamicResource PrimaryText}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="{DynamicResource ToolBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                Padding="4,2">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Execute (F5)" Command="{Binding ExecuteQueryCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+                <Button Content="Cancel" Command="{Binding CancelQueryCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12"
+                        IsEnabled="{Binding IsExecuting}" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,2" />
+                <Button Content="New Tab" Command="{Binding NewQueryTabCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,2" />
+                <Button Content="Export CSV" Command="{Binding ExportToCsvCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+                <Button Content="Copy" Command="{Binding CopyToClipboardCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+            </StackPanel>
+        </Border>
+
+        <!-- Query Tabs -->
+        <TabControl Grid.Row="1" ItemsSource="{Binding QueryTabs}"
+                    SelectedItem="{Binding ActiveTab}"
+                    Background="Transparent"
+                    Padding="0" Margin="0">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Title}" Margin="4,2" />
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate />
+            </TabControl.ContentTemplate>
+        </TabControl>
+
+        <!-- Query Editor -->
+        <avalonedit:TextEditor Grid.Row="2"
+                               x:Name="QueryEditor"
+                               FontFamily="Cascadia Code, Consolas, Courier New"
+                               FontSize="13"
+                               ShowLineNumbers="True"
+                               Background="{DynamicResource EditorBackground}"
+                               Foreground="{DynamicResource PrimaryText}"
+                               Padding="4"
+                               WordWrap="False"
+                               HorizontalScrollBarVisibility="Auto"
+                               VerticalScrollBarVisibility="Auto" />
+
+        <!-- Splitter -->
+        <GridSplitter Grid.Row="3" Height="4" HorizontalAlignment="Stretch"
+                      Background="{DynamicResource BorderBrush}" />
+
+        <!-- Results Grid -->
+        <Grid Grid.Row="4">
+            <DataGrid ItemsSource="{Binding ResultData}"
+                      AutoGenerateColumns="True"
+                      IsReadOnly="True"
+                      CanUserSortColumns="True"
+                      CanUserResizeColumns="True"
+                      EnableRowVirtualization="True"
+                      EnableColumnVirtualization="True"
+                      Background="{DynamicResource EditorBackground}"
+                      Foreground="{DynamicResource PrimaryText}"
+                      GridLinesVisibility="All"
+                      HeadersVisibility="Column"
+                      FontSize="12"
+                      AlternatingRowBackground="{DynamicResource AlternateRowBackground}" />
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Foreground="Red" FontSize="12"
+                       Margin="8" TextWrapping="Wrap"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVis}}" />
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="5" Background="{DynamicResource StatusBarBackground}"
+                Padding="6,3">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding StatusText}" Foreground="White" FontSize="11" Margin="0,0,16,0" />
+                <TextBlock Text="{Binding RowCountText}" Foreground="White" FontSize="11" Margin="0,0,16,0" />
+                <TextBlock Text="{Binding ExecutionTimeText}" Foreground="White" FontSize="11" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

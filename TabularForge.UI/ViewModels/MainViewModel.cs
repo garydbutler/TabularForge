@@ -8,6 +8,7 @@ using TabularForge.Core.Commands;
 using TabularForge.Core.Models;
 using TabularForge.Core.Services;
 using TabularForge.DAXParser.Semantics;
+using TabularForge.UI.Views;
 
 namespace TabularForge.UI.ViewModels;
 
@@ -16,8 +17,12 @@ namespace TabularForge.UI.ViewModels;
 /// </summary>
 public partial class MainViewModel : ObservableObject
 {
-    private readonly BimFileService _bimFileService = new();
-    private readonly UndoRedoManager _undoRedoManager = new();
+    private readonly BimFileService _bimFileService;
+    private readonly UndoRedoManager _undoRedoManager;
+    private readonly ConnectionService _connectionService;
+    private readonly QueryService _queryService;
+    private readonly RefreshService _refreshService;
+    private readonly DeploymentService _deploymentService;
     private string? _currentFilePath;
 
     // === Model State ===
@@ -96,6 +101,20 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private ErrorListViewModel _errorList = new();
 
+    // === Phase 3: Connected Feature ViewModels ===
+
+    [ObservableProperty]
+    private DaxQueryViewModel? _daxQuery;
+
+    [ObservableProperty]
+    private TablePreviewViewModel? _tablePreview;
+
+    [ObservableProperty]
+    private DataRefreshViewModel? _dataRefresh;
+
+    [ObservableProperty]
+    private bool _isServerConnected;
+
     // === Undo/Redo ===
 
     public UndoRedoManager UndoRedo => _undoRedoManager;
@@ -105,8 +124,43 @@ public partial class MainViewModel : ObservableObject
     public string UndoDescription => _undoRedoManager.UndoDescription;
     public string RedoDescription => _undoRedoManager.RedoDescription;
 
-    public MainViewModel()
+    public MainViewModel(
+        BimFileService bimFileService,
+        UndoRedoManager undoRedoManager,
+        ConnectionService connectionService,
+        QueryService queryService,
+        RefreshService refreshService,
+        DeploymentService deploymentService)
     {
+        _bimFileService = bimFileService;
+        _undoRedoManager = undoRedoManager;
+        _connectionService = connectionService;
+        _queryService = queryService;
+        _refreshService = refreshService;
+        _deploymentService = deploymentService;
+
+        // Initialize Phase 3 sub-ViewModels
+        DaxQuery = new DaxQueryViewModel(queryService, connectionService);
+        TablePreview = new TablePreviewViewModel(queryService, connectionService);
+        DataRefresh = new DataRefreshViewModel(refreshService, connectionService);
+
+        // Wire message logging from sub-VMs
+        DaxQuery.MessageLogged += (_, msg) => AddMessage(msg);
+        TablePreview.MessageLogged += (_, msg) => AddMessage(msg);
+        DataRefresh.MessageLogged += (_, msg) => AddMessage(msg);
+
+        // Track connection state changes
+        _connectionService.ConnectionStateChanged += (_, connected) =>
+        {
+            IsServerConnected = connected;
+            ConnectionStatus = connected
+                ? $"Connected: {_connectionService.CurrentConnection?.DisplayName}"
+                : "Disconnected";
+
+            if (connected)
+                RefreshTableLists();
+        };
+
         _undoRedoManager.StateChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(CanUndo));
@@ -175,6 +229,9 @@ public partial class MainViewModel : ObservableObject
 
             AddMessage($"Opened: {filePath}");
             AddMessage($"Model: {root.Name} | {count} objects");
+
+            // Update refresh view with refreshable objects
+            DataRefresh?.LoadRefreshableObjects(root);
 
             // Auto-select the model root
             SelectedNode = root;
@@ -502,6 +559,175 @@ public partial class MainViewModel : ObservableObject
     }
 
     // ===========================
+    //  PHASE 3: SERVER CONNECTION
+    // ===========================
+
+    [RelayCommand]
+    private void ConnectToServer()
+    {
+        var dialogVm = new ConnectionDialogViewModel(_connectionService);
+        var dialog = new ConnectionDialog(dialogVm)
+        {
+            Owner = Application.Current.MainWindow
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            AddMessage($"Connected to {dialogVm.ResultConnectionInfo?.DisplayName}");
+            StatusMessage = $"Connected to {dialogVm.ResultConnectionInfo?.DisplayName}";
+
+            // Refresh table lists for preview and refresh panels
+            RefreshTableLists();
+            DataRefresh?.LoadRefreshableObjects(ModelRoot);
+        }
+    }
+
+    [RelayCommand]
+    private async Task Disconnect()
+    {
+        if (!_connectionService.IsConnected) return;
+
+        await _connectionService.DisconnectAsync();
+        ConnectionStatus = "Disconnected";
+        IsServerConnected = false;
+        AddMessage("Disconnected from server.");
+        StatusMessage = "Disconnected";
+    }
+
+    private void RefreshTableLists()
+    {
+        if (ModelRoot == null) return;
+
+        var tableNames = new List<string>();
+        CollectTableNames(ModelRoot, tableNames);
+        TablePreview?.RefreshTableList(tableNames);
+    }
+
+    private void CollectTableNames(TomNode node, List<string> tableNames)
+    {
+        if (node.ObjectType == TomObjectType.Table)
+            tableNames.Add(node.Name);
+        foreach (var child in node.Children)
+            CollectTableNames(child, tableNames);
+    }
+
+    // ===========================
+    //  PHASE 3: DAX QUERY
+    // ===========================
+
+    [RelayCommand]
+    private void OpenDaxQuery()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "dax_query");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "DAX Query",
+            ContentId = "dax_query",
+            TabType = DocumentTabType.DaxQuery,
+            Content = "EVALUATE\n\n"
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+        AddMessage("DAX Query panel opened.");
+    }
+
+    // ===========================
+    //  PHASE 3: TABLE PREVIEW
+    // ===========================
+
+    [RelayCommand]
+    private void OpenTablePreview()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "table_preview");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "Table Preview",
+            ContentId = "table_preview",
+            TabType = DocumentTabType.TablePreview,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+        AddMessage("Table Preview panel opened.");
+
+        // Populate table list if model is loaded
+        RefreshTableLists();
+    }
+
+    // ===========================
+    //  PHASE 3: DATA REFRESH
+    // ===========================
+
+    [RelayCommand]
+    private void OpenDataRefresh()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "data_refresh");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "Data Refresh",
+            ContentId = "data_refresh",
+            TabType = DocumentTabType.DataRefresh,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+        DataRefresh?.LoadRefreshableObjects(ModelRoot);
+        AddMessage("Data Refresh panel opened.");
+    }
+
+    // ===========================
+    //  PHASE 3: DEPLOYMENT WIZARD
+    // ===========================
+
+    [RelayCommand]
+    private void OpenDeploymentWizard()
+    {
+        if (ModelRoot == null)
+        {
+            AddMessage("No model loaded. Open a .bim file first.");
+            MessageBox.Show("No model is loaded. Please open a .bim file first.",
+                "Deployment", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var wizardVm = new DeploymentWizardViewModel(_deploymentService, _connectionService);
+        wizardVm.MessageLogged += (_, msg) => AddMessage(msg);
+        wizardVm.Initialize(ModelRoot);
+
+        var dialog = new DeploymentWizardDialog
+        {
+            DataContext = wizardVm,
+            Owner = Application.Current.MainWindow
+        };
+
+        dialog.ShowDialog();
+
+        if (wizardVm.DeploymentSucceeded)
+        {
+            AddMessage("Deployment completed successfully.");
+            StatusMessage = "Deployment completed";
+        }
+    }
+
+    // ===========================
     //  MODEL INFO (Phase 2)
     // ===========================
 
@@ -589,17 +815,15 @@ public partial class MainViewModel : ObservableObject
     private void ShowAbout()
     {
         MessageBox.Show(
-            "TabularForge v2.0.0\n\n" +
+            "TabularForge v3.0.0\n\n" +
             "A Tabular Model Editor for Power BI and Analysis Services\n\n" +
             "Built with .NET 8, WPF, AvalonDock, and AvalonEdit\n\n" +
-            "Phase 2: Editor Enhancement\n" +
-            "- DAX IntelliSense\n" +
-            "- DAX Semantic Checking\n" +
-            "- DAX Formatting\n" +
-            "- DAX Scripting\n" +
-            "- Find & Replace\n" +
-            "- Bracket Matching\n" +
-            "- Error List Panel",
+            "Phase 3: Connected Features\n" +
+            "- Server Connection (SSAS, Azure AS, Power BI XMLA)\n" +
+            "- DAX Query Editor with execution\n" +
+            "- Table Data Preview\n" +
+            "- Data Refresh\n" +
+            "- Deployment Wizard",
             "About TabularForge",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
@@ -617,6 +841,7 @@ public enum DocumentTabType
     DaxScript,
     Diagram,
     TablePreview,
+    DataRefresh,
     Welcome
 }
 

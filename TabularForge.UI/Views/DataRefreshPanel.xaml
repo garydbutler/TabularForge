@@ -1,0 +1,101 @@
+<UserControl x:Class="TabularForge.UI.Views.DataRefreshPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource EditorBackground}"
+             Foreground="{DynamicResource PrimaryText}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="{DynamicResource ToolBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                Padding="4,2">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Refresh Type:" VerticalAlignment="Center" Margin="4,0,6,0" FontSize="12" />
+                <ComboBox ItemsSource="{Binding RefreshTypes}"
+                          SelectedItem="{Binding SelectedRefreshType}"
+                          Width="120" Padding="4,3" FontSize="12" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,2" />
+                <Button Content="Refresh Selected" Command="{Binding RefreshSelectedCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12"
+                        IsEnabled="{Binding IsRefreshing, Converter={StaticResource InverseBool}}" />
+                <Button Content="Refresh All" Command="{Binding RefreshAllCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12"
+                        IsEnabled="{Binding IsRefreshing, Converter={StaticResource InverseBool}}" />
+                <Button Content="Cancel" Command="{Binding CancelRefreshCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12"
+                        IsEnabled="{Binding IsRefreshing}" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,2" />
+                <Button Content="Clear History" Command="{Binding ClearHistoryCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+            </StackPanel>
+        </Border>
+
+        <!-- Objects List -->
+        <GroupBox Grid.Row="1" Header="Refreshable Objects" Margin="4">
+            <ListBox ItemsSource="{Binding RefreshableObjects}"
+                     SelectedItem="{Binding SelectedObject}"
+                     DisplayMemberPath="DisplayName"
+                     FontSize="12" />
+        </GroupBox>
+
+        <!-- Active Operations Header -->
+        <TextBlock Grid.Row="2" Text="Active Operations" FontWeight="SemiBold"
+                   FontSize="12" Margin="8,4" />
+
+        <!-- Bottom: Split between Active Operations and History -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Active Operations -->
+            <GroupBox Grid.Column="0" Header="In Progress" Margin="4">
+                <ListView ItemsSource="{Binding ActiveOperations}" FontSize="11">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Object" DisplayMemberBinding="{Binding ObjectName}" Width="120" />
+                            <GridViewColumn Header="Type" DisplayMemberBinding="{Binding RefreshType}" Width="80" />
+                            <GridViewColumn Header="Status" DisplayMemberBinding="{Binding State}" Width="80" />
+                            <GridViewColumn Header="Progress" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ProgressBar Value="{Binding ProgressPercent}" Minimum="0" Maximum="100"
+                                                     Width="60" Height="14" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </GroupBox>
+
+            <!-- History -->
+            <GroupBox Grid.Column="1" Header="History" Margin="4">
+                <ListView ItemsSource="{Binding History}" FontSize="11">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Object" DisplayMemberBinding="{Binding ObjectName}" Width="120" />
+                            <GridViewColumn Header="Type" DisplayMemberBinding="{Binding RefreshType}" Width="70" />
+                            <GridViewColumn Header="Result" DisplayMemberBinding="{Binding FinalState}" Width="70" />
+                            <GridViewColumn Header="Duration" DisplayMemberBinding="{Binding Duration, StringFormat={}{0:mm\\:ss}}" Width="70" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </GroupBox>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="4" Background="{DynamicResource StatusBarBackground}" Padding="6,3">
+            <TextBlock Text="{Binding StatusText}" Foreground="White" FontSize="11" />
+        </Border>
+    </Grid>
+</UserControl>
