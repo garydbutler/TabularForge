@@ -60,6 +60,9 @@
     <SolidColorBrush x:Key="ScrollBarThumb" Color="#C1C1C1" />
     <SolidColorBrush x:Key="ScrollBarThumbHover" Color="#A0A0A0" />
 
+    <!-- Data Grid Alternate Row -->
+    <SolidColorBrush x:Key="AlternateRowBackground" Color="#F5F5F5" />
+
     <!-- Input Controls -->
     <SolidColorBrush x:Key="InputBackground" Color="#FFFFFF" />
     <SolidColorBrush x:Key="InputBorderBrush" Color="#CCCCCC" />

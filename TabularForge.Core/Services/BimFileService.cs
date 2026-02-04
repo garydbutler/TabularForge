@@ -432,6 +432,16 @@ public class BimFileService
     }
 
     /// <summary>
+    /// Gets the root JSON object for deployment/serialization.
+    /// </summary>
+    public JObject? GetModelJson(TomNode modelNode)
+    {
+        if (_rootJson == null) return null;
+        SyncNodeToJson(modelNode);
+        return _rootJson.DeepClone() as JObject;
+    }
+
+    /// <summary>
     /// Counts all objects in the model tree.
     /// </summary>
     public static int CountObjects(TomNode node)

@@ -61,8 +61,32 @@ public partial class MainWindow : Window
         {
             DocumentTabType.DaxEditor => new DaxEditorPanel(),
             DocumentTabType.DaxScript => new DaxScriptingPanel(),
+            DocumentTabType.DaxQuery => CreateDaxQueryPanel(),
+            DocumentTabType.TablePreview => CreateTablePreviewPanel(),
+            DocumentTabType.DataRefresh => CreateDataRefreshPanel(),
             _ => new WelcomePanel()
         };
+    }
+
+    private DaxQueryPanel CreateDaxQueryPanel()
+    {
+        var panel = new DaxQueryPanel();
+        panel.DataContext = _viewModel.DaxQuery;
+        return panel;
+    }
+
+    private TablePreviewPanel CreateTablePreviewPanel()
+    {
+        var panel = new TablePreviewPanel();
+        panel.DataContext = _viewModel.TablePreview;
+        return panel;
+    }
+
+    private DataRefreshPanel CreateDataRefreshPanel()
+    {
+        var panel = new DataRefreshPanel();
+        panel.DataContext = _viewModel.DataRefresh;
+        return panel;
     }
 
     private void DockManager_ActiveContentChanged(object? sender, EventArgs e)

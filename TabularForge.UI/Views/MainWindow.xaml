@@ -6,7 +6,6 @@
         xmlns:avalonDock="https://github.com/Dirkster99/AvalonDock"
         xmlns:vm="clr-namespace:TabularForge.UI.ViewModels"
         xmlns:views="clr-namespace:TabularForge.UI.Views"
-        xmlns:conv="clr-namespace:TabularForge.UI.Converters"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
         Height="900" Width="1440"
@@ -15,12 +14,6 @@
         WindowState="Maximized"
         Background="{DynamicResource WindowBackground}"
         Foreground="{DynamicResource PrimaryText}">
-
-    <Window.Resources>
-        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
-        <conv:ObjectTypeToIconConverter x:Key="TypeToIcon" />
-        <conv:ObjectTypeToColorConverter x:Key="TypeToColor" />
-    </Window.Resources>
 
     <Window.InputBindings>
         <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenFileCommand}" />
@@ -83,17 +76,20 @@
                 <Separator />
                 <MenuItem Header="_DAX Script" Command="{Binding OpenDaxScriptCommand}"
                           InputGestureText="Ctrl+Shift+D" />
+                <MenuItem Header="DAX _Query" Command="{Binding OpenDaxQueryCommand}" />
+                <MenuItem Header="_Table Preview" Command="{Binding OpenTablePreviewCommand}" />
+                <MenuItem Header="Data _Refresh" Command="{Binding OpenDataRefreshCommand}" />
                 <Separator />
                 <MenuItem Header="_Toggle Theme" Command="{Binding ToggleThemeCommand}" />
             </MenuItem>
 
             <!-- Model Menu -->
             <MenuItem Header="_Model">
-                <MenuItem Header="_Connect to Server..." IsEnabled="False" />
-                <MenuItem Header="_Disconnect" IsEnabled="False" />
+                <MenuItem Header="_Connect to Server..." Command="{Binding ConnectToServerCommand}" />
+                <MenuItem Header="_Disconnect" Command="{Binding DisconnectCommand}" />
                 <Separator />
-                <MenuItem Header="_Refresh..." IsEnabled="False" />
-                <MenuItem Header="_Deploy..." IsEnabled="False" />
+                <MenuItem Header="_Refresh..." Command="{Binding OpenDataRefreshCommand}" />
+                <MenuItem Header="_Deploy..." Command="{Binding OpenDeploymentWizardCommand}" />
                 <Separator />
                 <MenuItem Header="Toggle _Hidden" Command="{Binding ToggleHiddenCommand}"
                           InputGestureText="Ctrl+I" />
@@ -158,9 +154,25 @@
                 <Border Width="1" Background="{DynamicResource SeparatorBrush}"
                         Margin="6,2" />
 
-                <Button ToolTip="Connect to Server" Padding="6,4" Margin="1,0"
-                        IsEnabled="False">
+                <Button Command="{Binding ConnectToServerCommand}" ToolTip="Connect to Server"
+                        Padding="6,4" Margin="1,0">
                     <TextBlock Text="Connect" FontSize="12" />
+                </Button>
+                <Button Command="{Binding DisconnectCommand}" ToolTip="Disconnect"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Disconnect" FontSize="12" />
+                </Button>
+
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
+                        Margin="6,2" />
+
+                <Button Command="{Binding OpenDaxQueryCommand}" ToolTip="DAX Query Editor"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Query" FontSize="12" />
+                </Button>
+                <Button Command="{Binding OpenDeploymentWizardCommand}" ToolTip="Deploy Model"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Deploy" FontSize="12" />
                 </Button>
 
                 <Border Width="1" Background="{DynamicResource SeparatorBrush}"
@@ -230,7 +242,7 @@
                             </avalonDock:LayoutDocumentPane>
                         </avalonDock:LayoutDocumentPaneGroup>
 
-                        <!-- BOTTOM: Messages/Output/Error List -->
+                        <!-- BOTTOM: Messages/Output/Error List/Data Refresh -->
                         <avalonDock:LayoutAnchorablePaneGroup DockHeight="200" Orientation="Horizontal">
                             <avalonDock:LayoutAnchorablePane>
                                 <avalonDock:LayoutAnchorable Title="Messages" ContentId="Messages"

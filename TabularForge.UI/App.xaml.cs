@@ -29,8 +29,9 @@ public partial class App : Application
 
         mainVm.AddMessage("TabularForge started.");
         mainVm.AddMessage($"Runtime: .NET {Environment.Version}");
-        mainVm.AddMessage("Phase 2: Editor Enhancement loaded.");
-        mainVm.AddMessage("Ready. Open a .bim file to begin.");
+        mainVm.AddMessage("Phase 3: Connected Features loaded.");
+        mainVm.AddMessage("Features: Server Connection, DAX Query, Table Preview, Data Refresh, Deployment.");
+        mainVm.AddMessage("Ready. Open a .bim file or connect to a server to begin.");
 
         mainWindow.Show();
 
@@ -47,6 +48,12 @@ public partial class App : Application
         services.AddSingleton<BimFileService>();
         services.AddSingleton<UndoRedoManager>();
 
+        // Phase 3: Connected services
+        services.AddSingleton<ConnectionService>();
+        services.AddSingleton<QueryService>();
+        services.AddSingleton<RefreshService>();
+        services.AddSingleton<DeploymentService>();
+
         // ViewModels
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<ErrorListViewModel>();
@@ -54,6 +61,12 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        // Dispose connection service to clean up server connections
+        if (_serviceProvider != null)
+        {
+            var connectionService = _serviceProvider.GetService<ConnectionService>();
+            connectionService?.Dispose();
+        }
         _serviceProvider?.Dispose();
         base.OnExit(e);
     }

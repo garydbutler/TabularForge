@@ -12,6 +12,16 @@
             <!-- Global Converters -->
             <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
             <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis" />
+ 
+            <conv:InverseBoolConverter x:Key="InverseBool" />
+            <conv:NullToVisibilityConverter x:Key="NullToVis" />
+            <conv:StepToVisibilityConverter x:Key="StepToVis" />
+            <conv:NotLastStepVisibilityConverter x:Key="NotLastStepVis" />
+            <conv:LastStepVisibilityConverter x:Key="LastStepVis" />
+            <conv:EnumToBoolConverter x:Key="EnumToBool" />
+            <conv:ObjectTypeToIconConverter x:Key="TypeToIcon" />
+            <conv:ObjectTypeToColorConverter x:Key="TypeToColor" />
+ 
         </ResourceDictionary>
     </Application.Resources>
 </Application>
