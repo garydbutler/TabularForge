@@ -60,6 +60,7 @@ public partial class MainWindow : Window
         return tab.TabType switch
         {
             DocumentTabType.DaxEditor => new DaxEditorPanel(),
+            DocumentTabType.DaxScript => new DaxScriptingPanel(),
             _ => new WelcomePanel()
         };
     }
@@ -77,6 +78,5 @@ public partial class MainWindow : Window
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
         base.OnClosing(e);
-        // Could prompt to save changes here
     }
 }

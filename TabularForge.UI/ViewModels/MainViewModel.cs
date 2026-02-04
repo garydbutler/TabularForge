@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using TabularForge.Core.Commands;
 using TabularForge.Core.Models;
 using TabularForge.Core.Services;
+using TabularForge.DAXParser.Semantics;
 
 namespace TabularForge.UI.ViewModels;
 
@@ -90,6 +91,11 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private DocumentTabViewModel? _activeDocument;
 
+    // === Error List (Phase 2) ===
+
+    [ObservableProperty]
+    private ErrorListViewModel _errorList = new();
+
     // === Undo/Redo ===
 
     public UndoRedoManager UndoRedo => _undoRedoManager;
@@ -127,6 +133,7 @@ public partial class MainViewModel : ObservableObject
         DaxEditorContent = string.Empty;
         DocumentTabs.Clear();
         _undoRedoManager.Clear();
+        ErrorList.Clear();
         WindowTitle = "TabularForge - New Model";
         ModelName = "New Model";
         ObjectCount = "0 objects";
@@ -350,7 +357,6 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void RenameNode()
     {
-        // This would be triggered by F2 or context menu. For now, basic implementation.
         if (SelectedNode == null) return;
         AddMessage($"Rename: {SelectedNode.Name} (use Properties panel to change name)");
     }
@@ -393,7 +399,7 @@ public partial class MainViewModel : ObservableObject
     private void ShowDependencies()
     {
         if (SelectedNode == null) return;
-        AddMessage($"Dependencies for {SelectedNode.Name}: (Phase 2 feature)");
+        AddMessage($"Dependencies for {SelectedNode.Name}: (Phase 3 feature)");
     }
 
     // ===========================
@@ -445,6 +451,122 @@ public partial class MainViewModel : ObservableObject
     }
 
     // ===========================
+    //  DAX SEMANTIC CHECK (Phase 2)
+    // ===========================
+
+    [RelayCommand]
+    private void CheckDaxSemantics()
+    {
+        if (SelectedNode == null || string.IsNullOrEmpty(DaxEditorContent)) return;
+
+        var modelInfo = BuildModelInfo();
+        var analyzer = new DaxSemanticAnalyzer(modelInfo);
+        var diagnostics = analyzer.Analyze(DaxEditorContent, SelectedNode.Name);
+
+        ErrorList.UpdateDiagnostics(diagnostics);
+        var errorCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Error);
+        var warnCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Warning);
+        AddMessage($"Semantic check for '{SelectedNode.Name}': {errorCount} errors, {warnCount} warnings");
+    }
+
+    // ===========================
+    //  DAX SCRIPTING (Phase 2)
+    // ===========================
+
+    [RelayCommand]
+    private void OpenDaxScript()
+    {
+        if (ModelRoot == null)
+        {
+            AddMessage("No model loaded. Open a .bim file first.");
+            return;
+        }
+
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "dax_script");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "DAX Script",
+            ContentId = "dax_script",
+            TabType = DocumentTabType.DaxScript,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+        AddMessage("DAX Scripting panel opened.");
+    }
+
+    // ===========================
+    //  MODEL INFO (Phase 2)
+    // ===========================
+
+    public ModelInfo BuildModelInfo()
+    {
+        var info = new ModelInfo();
+        if (ModelRoot == null) return info;
+
+        CollectModelInfo(ModelRoot, info);
+        return info;
+    }
+
+    private void CollectModelInfo(TomNode node, ModelInfo info)
+    {
+        if (node.ObjectType == TomObjectType.Table)
+        {
+            var tableInfo = new TableInfo { Name = node.Name };
+
+            foreach (var child in node.Children)
+            {
+                CollectTableMembers(child, tableInfo);
+            }
+
+            info.Tables.Add(tableInfo);
+        }
+
+        foreach (var child in node.Children)
+        {
+            CollectModelInfo(child, info);
+        }
+    }
+
+    private void CollectTableMembers(TomNode node, TableInfo tableInfo)
+    {
+        switch (node.ObjectType)
+        {
+            case TomObjectType.DataColumn:
+            case TomObjectType.Column:
+            case TomObjectType.CalculatedColumn:
+            case TomObjectType.CalculatedTableColumn:
+                tableInfo.Columns.Add(new ColumnInfo
+                {
+                    Name = node.Name,
+                    DataType = node.DataType,
+                    TableName = tableInfo.Name
+                });
+                break;
+
+            case TomObjectType.Measure:
+                tableInfo.Measures.Add(new MeasureInfo
+                {
+                    Name = node.Name,
+                    Expression = node.Expression,
+                    TableName = tableInfo.Name
+                });
+                break;
+        }
+
+        foreach (var child in node.Children)
+        {
+            CollectTableMembers(child, tableInfo);
+        }
+    }
+
+    // ===========================
     //  MESSAGES
     // ===========================
 
@@ -467,10 +589,17 @@ public partial class MainViewModel : ObservableObject
     private void ShowAbout()
     {
         MessageBox.Show(
-            "TabularForge v1.0.0\n\n" +
+            "TabularForge v2.0.0\n\n" +
             "A Tabular Model Editor for Power BI and Analysis Services\n\n" +
             "Built with .NET 8, WPF, AvalonDock, and AvalonEdit\n\n" +
-            "Phase 1: Foundation MVP",
+            "Phase 2: Editor Enhancement\n" +
+            "- DAX IntelliSense\n" +
+            "- DAX Semantic Checking\n" +
+            "- DAX Formatting\n" +
+            "- DAX Scripting\n" +
+            "- Find & Replace\n" +
+            "- Bracket Matching\n" +
+            "- Error List Panel",
             "About TabularForge",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
@@ -485,6 +614,7 @@ public enum DocumentTabType
 {
     DaxEditor,
     DaxQuery,
+    DaxScript,
     Diagram,
     TablePreview,
     Welcome

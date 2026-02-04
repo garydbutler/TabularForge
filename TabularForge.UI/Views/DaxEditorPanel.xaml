@@ -17,12 +17,71 @@
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="12" VerticalAlignment="Center" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Format" Click="FormatButton_Click"
+                            Padding="8,3" Margin="0,0,4,0" FontSize="11"
+                            ToolTip="Format DAX expression (Ctrl+Shift+F)" />
                     <Button Content="Apply (F5)" Command="{Binding ApplyDaxExpressionCommand}"
                             Padding="8,3" FontSize="11"
                             Background="{DynamicResource ButtonBackground}"
                             Foreground="{DynamicResource ButtonText}" />
                 </StackPanel>
             </DockPanel>
+        </Border>
+
+        <!-- Find/Replace Bar -->
+        <Border x:Name="FindReplaceBar" DockPanel.Dock="Top" Padding="8,4"
+                Background="{DynamicResource TabBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                Visibility="Collapsed">
+            <StackPanel>
+                <!-- Find Row -->
+                <DockPanel Margin="0,2">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="4,0,0,0">
+                        <TextBlock x:Name="FindStatusText" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SecondaryText}" FontSize="11"
+                                   Margin="0,0,8,0" />
+                        <Button Content="&#x25B2;" Click="FindPrevious_Click" ToolTip="Previous (Shift+Enter)"
+                                Padding="6,2" FontSize="10" />
+                        <Button Content="&#x25BC;" Click="FindNext_Click" ToolTip="Next (Enter)"
+                                Padding="6,2" FontSize="10" Margin="2,0,0,0" />
+                        <Button Content="X" Click="CloseFindReplace_Click" ToolTip="Close (Escape)"
+                                Padding="6,2" FontSize="10" Margin="4,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Margin="4,0">
+                        <CheckBox x:Name="CaseSensitiveCheck" Content="Aa" ToolTip="Match Case"
+                                  Foreground="{DynamicResource PrimaryText}" VerticalAlignment="Center"
+                                  Margin="0,0,4,0" Checked="FindOptions_Changed" Unchecked="FindOptions_Changed" />
+                        <CheckBox x:Name="WholeWordCheck" Content="W" ToolTip="Whole Word"
+                                  Foreground="{DynamicResource PrimaryText}" VerticalAlignment="Center"
+                                  Margin="0,0,4,0" Checked="FindOptions_Changed" Unchecked="FindOptions_Changed" />
+                        <CheckBox x:Name="RegexCheck" Content=".*" ToolTip="Use Regular Expression"
+                                  Foreground="{DynamicResource PrimaryText}" VerticalAlignment="Center"
+                                  Checked="FindOptions_Changed" Unchecked="FindOptions_Changed" />
+                    </StackPanel>
+                    <TextBox x:Name="FindTextBox" VerticalAlignment="Center"
+                             Background="{DynamicResource InputBackground}"
+                             Foreground="{DynamicResource InputText}"
+                             BorderBrush="{DynamicResource InputBorderBrush}"
+                             Padding="4,3" FontSize="12"
+                             KeyDown="FindTextBox_KeyDown"
+                             TextChanged="FindTextBox_TextChanged" />
+                </DockPanel>
+
+                <!-- Replace Row -->
+                <DockPanel x:Name="ReplaceRow" Margin="0,2" Visibility="Collapsed">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="4,0,0,0">
+                        <Button Content="Replace" Click="ReplaceNext_Click" ToolTip="Replace next"
+                                Padding="6,2" FontSize="11" />
+                        <Button Content="All" Click="ReplaceAll_Click" ToolTip="Replace all"
+                                Padding="6,2" FontSize="11" Margin="2,0,0,0" />
+                    </StackPanel>
+                    <TextBox x:Name="ReplaceTextBox" VerticalAlignment="Center"
+                             Background="{DynamicResource InputBackground}"
+                             Foreground="{DynamicResource InputText}"
+                             BorderBrush="{DynamicResource InputBorderBrush}"
+                             Padding="4,3" FontSize="12" />
+                </DockPanel>
+            </StackPanel>
         </Border>
 
         <!-- AvalonEdit DAX Editor -->
