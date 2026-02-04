@@ -1,0 +1,316 @@
+{
+  "name": "AdventureWorks Sample",
+  "compatibilityLevel": 1500,
+  "model": {
+    "culture": "en-US",
+    "dataSources": [
+      {
+        "type": "structured",
+        "name": "SQL/AdventureWorks",
+        "connectionDetails": {
+          "protocol": "tds",
+          "address": {
+            "server": "localhost",
+            "database": "AdventureWorksDW"
+          }
+        }
+      }
+    ],
+    "tables": [
+      {
+        "name": "Sales",
+        "columns": [
+          { "name": "SalesOrderID", "dataType": "int64", "sourceColumn": "SalesOrderID" },
+          { "name": "ProductKey", "dataType": "int64", "sourceColumn": "ProductKey" },
+          { "name": "CustomerKey", "dataType": "int64", "sourceColumn": "CustomerKey" },
+          { "name": "OrderDateKey", "dataType": "int64", "sourceColumn": "OrderDateKey" },
+          { "name": "Quantity", "dataType": "int64", "sourceColumn": "OrderQuantity" },
+          { "name": "UnitPrice", "dataType": "decimal", "sourceColumn": "UnitPrice" },
+          { "name": "TotalCost", "dataType": "decimal", "sourceColumn": "TotalProductCost" },
+          { "name": "SalesAmount", "dataType": "decimal", "sourceColumn": "SalesAmount" },
+          { "name": "TaxAmount", "dataType": "decimal", "sourceColumn": "TaxAmt" },
+          { "name": "Freight", "dataType": "decimal", "sourceColumn": "Freight" },
+          {
+            "name": "GrossProfit",
+            "dataType": "decimal",
+            "type": "calculated",
+            "expression": "[SalesAmount] - [TotalCost]"
+          },
+          {
+            "name": "ProfitMarginPct",
+            "dataType": "double",
+            "type": "calculated",
+            "expression": "IF([SalesAmount] = 0, BLANK(), DIVIDE([SalesAmount] - [TotalCost], [SalesAmount]))"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Total Revenue",
+            "expression": "SUM(Sales[SalesAmount])",
+            "formatString": "$#,##0.00"
+          },
+          {
+            "name": "Total Cost",
+            "expression": "SUM(Sales[TotalCost])",
+            "formatString": "$#,##0.00"
+          },
+          {
+            "name": "Gross Profit",
+            "expression": "[Total Revenue] - [Total Cost]",
+            "formatString": "$#,##0.00"
+          },
+          {
+            "name": "Profit Margin %",
+            "expression": "DIVIDE([Gross Profit], [Total Revenue], BLANK())",
+            "formatString": "0.00%"
+          },
+          {
+            "name": "Order Count",
+            "expression": "DISTINCTCOUNT(Sales[SalesOrderID])",
+            "formatString": "#,##0"
+          },
+          {
+            "name": "Avg Order Value",
+            "expression": "DIVIDE([Total Revenue], [Order Count], BLANK())",
+            "formatString": "$#,##0.00"
+          },
+          {
+            "name": "YTD Revenue",
+            "expression": "TOTALYTD([Total Revenue], 'Calendar'[Date])",
+            "formatString": "$#,##0.00"
+          },
+          {
+            "name": "Revenue MoM Growth",
+            "expression": [
+              "VAR CurrentMonth = [Total Revenue]",
+              "VAR PreviousMonth =",
+              "    CALCULATE(",
+              "        [Total Revenue],",
+              "        DATEADD('Calendar'[Date], -1, MONTH)",
+              "    )",
+              "RETURN",
+              "    DIVIDE(",
+              "        CurrentMonth - PreviousMonth,",
+              "        PreviousMonth,",
+              "        BLANK()",
+              "    )"
+            ],
+            "formatString": "0.00%"
+          },
+          {
+            "name": "Revenue vs Target",
+            "expression": "DIVIDE([Total Revenue], SUM(Targets[TargetAmount]), BLANK()) - 1",
+            "formatString": "0.00%"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Sales",
+            "source": { "type": "query", "query": "SELECT * FROM FactInternetSales", "dataSource": "SQL/AdventureWorks" }
+          }
+        ]
+      },
+      {
+        "name": "Products",
+        "columns": [
+          { "name": "ProductKey", "dataType": "int64", "sourceColumn": "ProductKey" },
+          { "name": "ProductName", "dataType": "string", "sourceColumn": "EnglishProductName" },
+          { "name": "Category", "dataType": "string", "sourceColumn": "ProductCategory" },
+          { "name": "Subcategory", "dataType": "string", "sourceColumn": "ProductSubcategory" },
+          { "name": "Color", "dataType": "string", "sourceColumn": "Color" },
+          { "name": "ListPrice", "dataType": "decimal", "sourceColumn": "ListPrice" },
+          { "name": "StandardCost", "dataType": "decimal", "sourceColumn": "StandardCost" },
+          { "name": "Size", "dataType": "string", "sourceColumn": "Size" },
+          { "name": "Weight", "dataType": "double", "sourceColumn": "Weight" },
+          {
+            "name": "PriceRange",
+            "dataType": "string",
+            "type": "calculated",
+            "expression": "SWITCH(TRUE(), [ListPrice] < 50, \"Budget\", [ListPrice] < 200, \"Mid-Range\", [ListPrice] < 1000, \"Premium\", \"Luxury\")"
+          },
+          {
+            "name": "Markup %",
+            "dataType": "double",
+            "type": "calculated",
+            "expression": "IF([StandardCost] = 0, BLANK(), DIVIDE([ListPrice] - [StandardCost], [StandardCost]))"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Product Count",
+            "expression": "DISTINCTCOUNT(Products[ProductKey])",
+            "formatString": "#,##0"
+          },
+          {
+            "name": "Avg List Price",
+            "expression": "AVERAGE(Products[ListPrice])",
+            "formatString": "$#,##0.00"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Products",
+            "source": { "type": "query", "query": "SELECT * FROM DimProduct", "dataSource": "SQL/AdventureWorks" }
+          }
+        ]
+      },
+      {
+        "name": "Customers",
+        "columns": [
+          { "name": "CustomerKey", "dataType": "int64", "sourceColumn": "CustomerKey" },
+          { "name": "FirstName", "dataType": "string", "sourceColumn": "FirstName" },
+          { "name": "LastName", "dataType": "string", "sourceColumn": "LastName" },
+          { "name": "Email", "dataType": "string", "sourceColumn": "EmailAddress" },
+          { "name": "City", "dataType": "string", "sourceColumn": "City" },
+          { "name": "State", "dataType": "string", "sourceColumn": "StateProvinceName" },
+          { "name": "Country", "dataType": "string", "sourceColumn": "CountryRegionName" },
+          { "name": "Gender", "dataType": "string", "sourceColumn": "Gender" },
+          { "name": "YearlyIncome", "dataType": "decimal", "sourceColumn": "YearlyIncome" },
+          {
+            "name": "FullName",
+            "dataType": "string",
+            "type": "calculated",
+            "expression": "[FirstName] & \" \" & [LastName]"
+          },
+          {
+            "name": "IncomeSegment",
+            "dataType": "string",
+            "type": "calculated",
+            "expression": "SWITCH(TRUE(), [YearlyIncome] < 40000, \"Low\", [YearlyIncome] < 80000, \"Medium\", [YearlyIncome] < 120000, \"High\", \"Very High\")"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Customer Count",
+            "expression": "DISTINCTCOUNT(Customers[CustomerKey])",
+            "formatString": "#,##0"
+          },
+          {
+            "name": "Revenue per Customer",
+            "expression": "DIVIDE([Total Revenue], [Customer Count], BLANK())",
+            "formatString": "$#,##0.00"
+          },
+          {
+            "name": "Repeat Customers",
+            "expression": [
+              "COUNTROWS(",
+              "    FILTER(",
+              "        VALUES(Sales[CustomerKey]),",
+              "        CALCULATE(DISTINCTCOUNT(Sales[SalesOrderID])) > 1",
+              "    )",
+              ")"
+            ],
+            "formatString": "#,##0"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Customers",
+            "source": { "type": "query", "query": "SELECT * FROM DimCustomer", "dataSource": "SQL/AdventureWorks" }
+          }
+        ]
+      },
+      {
+        "name": "Calendar",
+        "columns": [
+          { "name": "DateKey", "dataType": "int64", "sourceColumn": "DateKey" },
+          { "name": "Date", "dataType": "dateTime", "sourceColumn": "FullDateAlternateKey" },
+          { "name": "Year", "dataType": "int64", "sourceColumn": "CalendarYear" },
+          { "name": "Quarter", "dataType": "string", "sourceColumn": "CalendarQuarter" },
+          { "name": "Month", "dataType": "string", "sourceColumn": "EnglishMonthName" },
+          { "name": "MonthNumber", "dataType": "int64", "sourceColumn": "MonthNumberOfYear" },
+          { "name": "DayOfWeek", "dataType": "string", "sourceColumn": "EnglishDayNameOfWeek" },
+          { "name": "WeekNumber", "dataType": "int64", "sourceColumn": "WeekNumberOfYear" },
+          {
+            "name": "YearMonth",
+            "dataType": "string",
+            "type": "calculated",
+            "expression": "FORMAT([Date], \"YYYY-MM\")"
+          },
+          {
+            "name": "IsWeekend",
+            "dataType": "boolean",
+            "type": "calculated",
+            "expression": "IF(WEEKDAY([Date], 2) >= 6, TRUE(), FALSE())"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Days in Period",
+            "expression": "COUNTROWS('Calendar')",
+            "formatString": "#,##0"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Calendar",
+            "source": { "type": "query", "query": "SELECT * FROM DimDate", "dataSource": "SQL/AdventureWorks" }
+          }
+        ]
+      },
+      {
+        "name": "Targets",
+        "columns": [
+          { "name": "TargetKey", "dataType": "int64", "sourceColumn": "TargetKey" },
+          { "name": "ProductKey", "dataType": "int64", "sourceColumn": "ProductKey" },
+          { "name": "DateKey", "dataType": "int64", "sourceColumn": "DateKey" },
+          { "name": "TargetAmount", "dataType": "decimal", "sourceColumn": "TargetAmount" }
+        ],
+        "measures": [
+          {
+            "name": "Total Target",
+            "expression": "SUM(Targets[TargetAmount])",
+            "formatString": "$#,##0.00"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Targets",
+            "source": { "type": "query", "query": "SELECT * FROM FactTargets", "dataSource": "SQL/AdventureWorks" }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "Sales_to_Products",
+        "fromTable": "Sales",
+        "fromColumn": "ProductKey",
+        "toTable": "Products",
+        "toColumn": "ProductKey"
+      },
+      {
+        "name": "Sales_to_Customers",
+        "fromTable": "Sales",
+        "fromColumn": "CustomerKey",
+        "toTable": "Customers",
+        "toColumn": "CustomerKey"
+      },
+      {
+        "name": "Sales_to_Calendar",
+        "fromTable": "Sales",
+        "fromColumn": "OrderDateKey",
+        "toTable": "Calendar",
+        "toColumn": "DateKey"
+      },
+      {
+        "name": "Targets_to_Products",
+        "fromTable": "Targets",
+        "fromColumn": "ProductKey",
+        "toTable": "Products",
+        "toColumn": "ProductKey"
+      },
+      {
+        "name": "Targets_to_Calendar",
+        "fromTable": "Targets",
+        "fromColumn": "DateKey",
+        "toTable": "Calendar",
+        "toColumn": "DateKey"
+      }
+    ],
+    "annotations": [
+      { "name": "TabularForge_Version", "value": "1.0.0" },
+      { "name": "TabularForge_Created", "value": "2026-02-04" }
+    ]
+  }
+}
