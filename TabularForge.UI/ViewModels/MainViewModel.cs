@@ -23,6 +23,8 @@ public partial class MainViewModel : ObservableObject
     private readonly QueryService _queryService;
     private readonly RefreshService _refreshService;
     private readonly DeploymentService _deploymentService;
+    private readonly DiagramService _diagramService;
+    private readonly VertiPaqService _vertiPaqService;
     private string? _currentFilePath;
 
     // === Model State ===
@@ -115,6 +117,17 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isServerConnected;
 
+    // === Phase 4: Visual Tools ViewModels ===
+
+    [ObservableProperty]
+    private DiagramViewModel? _diagram;
+
+    [ObservableProperty]
+    private PivotGridViewModel? _pivotGrid;
+
+    [ObservableProperty]
+    private VertiPaqViewModel? _vertiPaq;
+
     // === Undo/Redo ===
 
     public UndoRedoManager UndoRedo => _undoRedoManager;
@@ -130,7 +143,9 @@ public partial class MainViewModel : ObservableObject
         ConnectionService connectionService,
         QueryService queryService,
         RefreshService refreshService,
-        DeploymentService deploymentService)
+        DeploymentService deploymentService,
+        DiagramService diagramService,
+        VertiPaqService vertiPaqService)
     {
         _bimFileService = bimFileService;
         _undoRedoManager = undoRedoManager;
@@ -138,16 +153,26 @@ public partial class MainViewModel : ObservableObject
         _queryService = queryService;
         _refreshService = refreshService;
         _deploymentService = deploymentService;
+        _diagramService = diagramService;
+        _vertiPaqService = vertiPaqService;
 
         // Initialize Phase 3 sub-ViewModels
         DaxQuery = new DaxQueryViewModel(queryService, connectionService);
         TablePreview = new TablePreviewViewModel(queryService, connectionService);
         DataRefresh = new DataRefreshViewModel(refreshService, connectionService);
 
+        // Initialize Phase 4 sub-ViewModels
+        Diagram = new DiagramViewModel(diagramService, connectionService);
+        PivotGrid = new PivotGridViewModel(queryService, connectionService);
+        VertiPaq = new VertiPaqViewModel(vertiPaqService, connectionService);
+
         // Wire message logging from sub-VMs
         DaxQuery.MessageLogged += (_, msg) => AddMessage(msg);
         TablePreview.MessageLogged += (_, msg) => AddMessage(msg);
         DataRefresh.MessageLogged += (_, msg) => AddMessage(msg);
+        Diagram.MessageLogged += (_, msg) => AddMessage(msg);
+        PivotGrid.MessageLogged += (_, msg) => AddMessage(msg);
+        VertiPaq.MessageLogged += (_, msg) => AddMessage(msg);
 
         // Track connection state changes
         _connectionService.ConnectionStateChanged += (_, connected) =>
@@ -232,6 +257,10 @@ public partial class MainViewModel : ObservableObject
 
             // Update refresh view with refreshable objects
             DataRefresh?.LoadRefreshableObjects(root);
+
+            // Update Phase 4 panels with model data
+            Diagram?.LoadFromModel(root);
+            PivotGrid?.LoadFieldsFromModel(root);
 
             // Auto-select the model root
             SelectedNode = root;
@@ -728,6 +757,90 @@ public partial class MainViewModel : ObservableObject
     }
 
     // ===========================
+    //  PHASE 4: DIAGRAM VIEW
+    // ===========================
+
+    [RelayCommand]
+    private void OpenDiagram()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "diagram_view");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "Diagram",
+            ContentId = "diagram_view",
+            TabType = DocumentTabType.Diagram,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+
+        // Load diagram from model if available
+        Diagram?.LoadFromModel(ModelRoot);
+        AddMessage("Diagram View opened.");
+    }
+
+    // ===========================
+    //  PHASE 4: PIVOT GRID
+    // ===========================
+
+    [RelayCommand]
+    private void OpenPivotGrid()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "pivot_grid");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "Pivot Grid",
+            ContentId = "pivot_grid",
+            TabType = DocumentTabType.PivotGrid,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+
+        // Load fields from model
+        PivotGrid?.LoadFieldsFromModel(ModelRoot);
+        AddMessage("Pivot Grid opened.");
+    }
+
+    // ===========================
+    //  PHASE 4: VERTIPAQ ANALYZER
+    // ===========================
+
+    [RelayCommand]
+    private void OpenVertiPaq()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "vertipaq_analyzer");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "VertiPaq Analyzer",
+            ContentId = "vertipaq_analyzer",
+            TabType = DocumentTabType.VertiPaq,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+        AddMessage("VertiPaq Analyzer opened.");
+    }
+
+    // ===========================
     //  MODEL INFO (Phase 2)
     // ===========================
 
@@ -815,15 +928,15 @@ public partial class MainViewModel : ObservableObject
     private void ShowAbout()
     {
         MessageBox.Show(
-            "TabularForge v3.0.0\n\n" +
+            "TabularForge v4.0.0\n\n" +
             "A Tabular Model Editor for Power BI and Analysis Services\n\n" +
             "Built with .NET 8, WPF, AvalonDock, and AvalonEdit\n\n" +
-            "Phase 3: Connected Features\n" +
-            "- Server Connection (SSAS, Azure AS, Power BI XMLA)\n" +
-            "- DAX Query Editor with execution\n" +
-            "- Table Data Preview\n" +
-            "- Data Refresh\n" +
-            "- Deployment Wizard",
+            "Phase 4: Visual Tools\n" +
+            "- Diagram View (Relationship Editor)\n" +
+            "- Pivot Grid\n" +
+            "- VertiPaq Analyzer\n\n" +
+            "Previous: Server Connection, DAX Query, Table Preview,\n" +
+            "Data Refresh, Deployment Wizard",
             "About TabularForge",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
@@ -842,6 +955,8 @@ public enum DocumentTabType
     Diagram,
     TablePreview,
     DataRefresh,
+    PivotGrid,
+    VertiPaq,
     Welcome
 }
 

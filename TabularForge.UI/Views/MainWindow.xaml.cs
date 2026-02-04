@@ -64,6 +64,9 @@ public partial class MainWindow : Window
             DocumentTabType.DaxQuery => CreateDaxQueryPanel(),
             DocumentTabType.TablePreview => CreateTablePreviewPanel(),
             DocumentTabType.DataRefresh => CreateDataRefreshPanel(),
+            DocumentTabType.Diagram => CreateDiagramPanel(),
+            DocumentTabType.PivotGrid => CreatePivotGridPanel(),
+            DocumentTabType.VertiPaq => CreateVertiPaqPanel(),
             _ => new WelcomePanel()
         };
     }
@@ -71,21 +74,42 @@ public partial class MainWindow : Window
     private DaxQueryPanel CreateDaxQueryPanel()
     {
         var panel = new DaxQueryPanel();
-        panel.DataContext = _viewModel.DaxQuery;
+        panel.DataContext = _viewModel?.DaxQuery;
         return panel;
     }
 
     private TablePreviewPanel CreateTablePreviewPanel()
     {
         var panel = new TablePreviewPanel();
-        panel.DataContext = _viewModel.TablePreview;
+        panel.DataContext = _viewModel?.TablePreview;
         return panel;
     }
 
     private DataRefreshPanel CreateDataRefreshPanel()
     {
         var panel = new DataRefreshPanel();
-        panel.DataContext = _viewModel.DataRefresh;
+        panel.DataContext = _viewModel?.DataRefresh;
+        return panel;
+    }
+
+    private DiagramPanel CreateDiagramPanel()
+    {
+        var panel = new DiagramPanel();
+        panel.DataContext = _viewModel?.Diagram;
+        return panel;
+    }
+
+    private PivotGridPanel CreatePivotGridPanel()
+    {
+        var panel = new PivotGridPanel();
+        panel.DataContext = _viewModel?.PivotGrid;
+        return panel;
+    }
+
+    private VertiPaqPanel CreateVertiPaqPanel()
+    {
+        var panel = new VertiPaqPanel();
+        panel.DataContext = _viewModel?.VertiPaq;
         return panel;
     }
 

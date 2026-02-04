@@ -1,0 +1,284 @@
+<UserControl x:Class="TabularForge.UI.Views.PivotGridPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource EditorBackground}"
+             Foreground="{DynamicResource PrimaryText}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="{DynamicResource ToolBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                Padding="4,2">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Execute Pivot" Command="{Binding ExecutePivotCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+                <Button Content="Cancel" Command="{Binding CancelPivotCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12"
+                        IsEnabled="{Binding IsExecuting}" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,2" />
+                <Button Content="Clear All" Command="{Binding ClearAllAreasCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,2" />
+                <CheckBox Content="Grand Totals" IsChecked="{Binding ShowGrandTotals}"
+                          VerticalAlignment="Center" Margin="4,0" FontSize="11" />
+                <CheckBox Content="Subtotals" IsChecked="{Binding ShowSubTotals}"
+                          VerticalAlignment="Center" Margin="4,0" FontSize="11" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,2" />
+                <Button Content="Export CSV" Command="{Binding ExportToCsvCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+                <Button Content="Export Excel" Command="{Binding ExportToExcelCommand}"
+                        Padding="8,4" Margin="2,0" FontSize="12" />
+            </StackPanel>
+        </Border>
+
+        <!-- Field Areas -->
+        <Grid Grid.Row="1" Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Available Fields -->
+            <Border Grid.Column="0" Background="{DynamicResource PanelBackground}"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="3" Margin="0,0,4,0" MaxHeight="250">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Available Fields"
+                               FontWeight="Bold" FontSize="12" Margin="8,6,8,4" />
+                    <ListBox ItemsSource="{Binding AvailableFields}"
+                             SelectedItem="{Binding SelectedAvailableField}"
+                             Background="Transparent" BorderThickness="0"
+                             FontSize="11" Margin="4,0,4,4"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="2,1">
+                                    <TextBlock Text="{Binding IsMeasure, Converter={StaticResource BoolToVis}, ConverterParameter=M}"
+                                               FontWeight="Bold" Margin="0,0,4,0"
+                                               FontSize="9" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMeasure}" Value="True">
+                                                        <Setter Property="Text" Value="M" />
+                                                        <Setter Property="Foreground" Value="#5CB85C" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsMeasure}" Value="False">
+                                                        <Setter Property="Text" Value="C" />
+                                                        <Setter Property="Foreground" Value="#4A90D9" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding DisplayName}"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding FullName}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add to Rows"
+                                          Command="{Binding DataContext.AddToRowsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          CommandParameter="{Binding DataContext.SelectedAvailableField, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <MenuItem Header="Add to Columns"
+                                          Command="{Binding DataContext.AddToColumnsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          CommandParameter="{Binding DataContext.SelectedAvailableField, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <MenuItem Header="Add to Values"
+                                          Command="{Binding DataContext.AddToValuesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          CommandParameter="{Binding DataContext.SelectedAvailableField, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <MenuItem Header="Add to Filters"
+                                          Command="{Binding DataContext.AddToFiltersCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          CommandParameter="{Binding DataContext.SelectedAvailableField, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Drop Areas -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Filters Area -->
+                <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                        Background="{DynamicResource PanelBackground}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        CornerRadius="3" Margin="0,0,0,4" MinHeight="50">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Filters" FontSize="10"
+                                   Foreground="{DynamicResource SecondaryText}" Margin="6,4,6,2" />
+                        <ItemsControl ItemsSource="{Binding FilterFields}" Margin="4,0,4,4">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#333337" CornerRadius="3" Margin="2" Padding="6,3">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding DisplayName}" FontSize="11" />
+                                            <Button Content="x" FontSize="9" Margin="6,0,0,0"
+                                                    Padding="2,0" VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.RemoveFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Border>
+
+                <!-- Rows Area -->
+                <Border Grid.Row="1" Grid.Column="0"
+                        Background="{DynamicResource PanelBackground}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        CornerRadius="3" Margin="0,0,2,0" MinHeight="50">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Rows" FontSize="10"
+                                   Foreground="{DynamicResource SecondaryText}" Margin="6,4,6,2" />
+                        <ItemsControl ItemsSource="{Binding RowFields}" Margin="4,0,4,4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#333337" CornerRadius="3" Margin="2" Padding="6,3">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding DisplayName}" FontSize="11" />
+                                            <Button Content="x" FontSize="9" Margin="6,0,0,0"
+                                                    Padding="2,0" VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.RemoveFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Border>
+
+                <!-- Columns + Values Area -->
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Columns Area -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource PanelBackground}"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            CornerRadius="3" Margin="2,0,0,2" MinHeight="40">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Columns" FontSize="10"
+                                       Foreground="{DynamicResource SecondaryText}" Margin="6,4,6,2" />
+                            <ItemsControl ItemsSource="{Binding ColumnFields}" Margin="4,0,4,4">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#333337" CornerRadius="3" Margin="2" Padding="6,3">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="11" />
+                                                <Button Content="x" FontSize="9" Margin="6,0,0,0"
+                                                        Padding="2,0" VerticalAlignment="Center"
+                                                        Command="{Binding DataContext.RemoveFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Values Area -->
+                    <Border Grid.Row="1"
+                            Background="{DynamicResource PanelBackground}"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            CornerRadius="3" Margin="2,0,0,0" MinHeight="40">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Values" FontSize="10"
+                                       Foreground="{DynamicResource SecondaryText}" Margin="6,4,6,2" />
+                            <ItemsControl ItemsSource="{Binding ValueFields}" Margin="4,0,4,4">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#333337" CornerRadius="3" Margin="2" Padding="6,3">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="11" />
+                                                <Button Content="x" FontSize="9" Margin="6,0,0,0"
+                                                        Padding="2,0" VerticalAlignment="Center"
+                                                        Command="{Binding DataContext.RemoveFieldCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Results DataGrid -->
+        <Grid Grid.Row="2">
+            <DataGrid ItemsSource="{Binding PivotData}"
+                      AutoGenerateColumns="True"
+                      IsReadOnly="True"
+                      CanUserSortColumns="True"
+                      CanUserResizeColumns="True"
+                      EnableRowVirtualization="True"
+                      EnableColumnVirtualization="True"
+                      Background="{DynamicResource EditorBackground}"
+                      Foreground="{DynamicResource PrimaryText}"
+                      GridLinesVisibility="All"
+                      HeadersVisibility="Column"
+                      FontSize="12"
+                      AlternatingRowBackground="{DynamicResource AlternateRowBackground}" />
+
+            <!-- Error overlay -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Foreground="Red" FontSize="12" Margin="8" TextWrapping="Wrap"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVis}}" />
+
+            <!-- Placeholder when no model -->
+            <TextBlock Text="Load a model and connect to a server to use the Pivot Grid."
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       FontSize="14" Opacity="0.5"
+                       Visibility="{Binding IsModelLoaded, Converter={StaticResource InverseBoolToVis}}" />
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="3" Background="{DynamicResource StatusBarBackground}" Padding="6,3">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding StatusText}" Foreground="White" FontSize="11" Margin="0,0,16,0" />
+                <TextBlock Text="{Binding RowCountText}" Foreground="White" FontSize="11" Margin="0,0,16,0" />
+                <TextBlock Text="{Binding ExecutionTimeText}" Foreground="White" FontSize="11" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

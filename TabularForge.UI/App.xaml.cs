@@ -29,8 +29,9 @@ public partial class App : Application
 
         mainVm.AddMessage("TabularForge started.");
         mainVm.AddMessage($"Runtime: .NET {Environment.Version}");
-        mainVm.AddMessage("Phase 3: Connected Features loaded.");
-        mainVm.AddMessage("Features: Server Connection, DAX Query, Table Preview, Data Refresh, Deployment.");
+        mainVm.AddMessage("Phase 4: Visual Tools loaded.");
+        mainVm.AddMessage("Features: Diagram View, Pivot Grid, VertiPaq Analyzer.");
+        mainVm.AddMessage("Previous: Server Connection, DAX Query, Table Preview, Data Refresh, Deployment.");
         mainVm.AddMessage("Ready. Open a .bim file or connect to a server to begin.");
 
         mainWindow.Show();
@@ -53,6 +54,10 @@ public partial class App : Application
         services.AddSingleton<QueryService>();
         services.AddSingleton<RefreshService>();
         services.AddSingleton<DeploymentService>();
+
+        // Phase 4: Visual Tools services
+        services.AddSingleton<DiagramService>();
+        services.AddSingleton<VertiPaqService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();

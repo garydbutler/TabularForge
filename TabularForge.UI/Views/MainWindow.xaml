@@ -80,6 +80,10 @@
                 <MenuItem Header="_Table Preview" Command="{Binding OpenTablePreviewCommand}" />
                 <MenuItem Header="Data _Refresh" Command="{Binding OpenDataRefreshCommand}" />
                 <Separator />
+                <MenuItem Header="_Diagram View" Command="{Binding OpenDiagramCommand}" />
+                <MenuItem Header="_Pivot Grid" Command="{Binding OpenPivotGridCommand}" />
+                <MenuItem Header="Verti_Paq Analyzer" Command="{Binding OpenVertiPaqCommand}" />
+                <Separator />
                 <MenuItem Header="_Toggle Theme" Command="{Binding ToggleThemeCommand}" />
             </MenuItem>
 
@@ -173,6 +177,22 @@
                 <Button Command="{Binding OpenDeploymentWizardCommand}" ToolTip="Deploy Model"
                         Padding="6,4" Margin="1,0">
                     <TextBlock Text="Deploy" FontSize="12" />
+                </Button>
+
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
+                        Margin="6,2" />
+
+                <Button Command="{Binding OpenDiagramCommand}" ToolTip="Diagram View"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Diagram" FontSize="12" />
+                </Button>
+                <Button Command="{Binding OpenPivotGridCommand}" ToolTip="Pivot Grid"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Pivot" FontSize="12" />
+                </Button>
+                <Button Command="{Binding OpenVertiPaqCommand}" ToolTip="VertiPaq Analyzer"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="VertiPaq" FontSize="12" />
                 </Button>
 
                 <Border Width="1" Background="{DynamicResource SeparatorBrush}"

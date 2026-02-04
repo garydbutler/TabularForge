@@ -21,7 +21,17 @@
             <conv:EnumToBoolConverter x:Key="EnumToBool" />
             <conv:ObjectTypeToIconConverter x:Key="TypeToIcon" />
             <conv:ObjectTypeToColorConverter x:Key="TypeToColor" />
- 
+
+            <!-- Phase 4 Converters -->
+            <conv:SizeToWidthConverter x:Key="SizeToWidth" />
+            <conv:PercentToWidthConverter x:Key="PercentToWidth" />
+            <conv:CardinalityToStringConverter x:Key="CardToString" />
+            <conv:BoolToFontWeightConverter x:Key="BoolToFontWeight" />
+            <conv:BoolToOpacityConverter x:Key="BoolToOpacity" />
+            <conv:SeverityToColorConverter x:Key="SeverityToColor" />
+            <conv:SeverityToIconConverter x:Key="SeverityToIcon" />
+            <conv:StringToBrushConverter x:Key="StringToBrush" />
+            <conv:BoolToLineStyleConverter x:Key="BoolToLineStyle" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
