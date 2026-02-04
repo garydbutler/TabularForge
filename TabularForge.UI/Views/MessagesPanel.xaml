@@ -1,0 +1,39 @@
+<UserControl x:Class="TabularForge.UI.Views.MessagesPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Background="{DynamicResource PanelBackground}">
+
+    <DockPanel>
+        <!-- Header with clear button -->
+        <Border DockPanel.Dock="Top" Padding="8,4"
+                Background="{DynamicResource SideBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <TextBlock Text="Messages" FontWeight="SemiBold" FontSize="11"
+                           Foreground="{DynamicResource PrimaryText}"
+                           VerticalAlignment="Center" />
+                <Button Content="Clear" HorizontalAlignment="Right"
+                        Padding="8,2" FontSize="10"
+                        Click="ClearMessages_Click" />
+            </DockPanel>
+        </Border>
+
+        <!-- Messages content -->
+        <TextBox x:Name="MessagesTextBox"
+                 Text="{Binding MessagesText, Mode=OneWay}"
+                 IsReadOnly="True"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Auto"
+                 Background="{DynamicResource PanelBackground}"
+                 Foreground="{DynamicResource PrimaryText}"
+                 BorderThickness="0"
+                 FontFamily="Cascadia Code, Consolas, Courier New"
+                 FontSize="11.5"
+                 Padding="8,4"
+                 AcceptsReturn="True" />
+    </DockPanel>
+</UserControl>

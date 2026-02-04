@@ -1,0 +1,277 @@
+<Window x:Class="TabularForge.UI.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonDock="https://github.com/Dirkster99/AvalonDock"
+        xmlns:vm="clr-namespace:TabularForge.UI.ViewModels"
+        xmlns:views="clr-namespace:TabularForge.UI.Views"
+        xmlns:conv="clr-namespace:TabularForge.UI.Converters"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}"
+        Height="900" Width="1440"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="{DynamicResource WindowBackground}"
+        Foreground="{DynamicResource PrimaryText}">
+
+    <Window.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:ObjectTypeToIconConverter x:Key="TypeToIcon" />
+        <conv:ObjectTypeToColorConverter x:Key="TypeToColor" />
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenFileCommand}" />
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveFileCommand}" />
+        <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{Binding SaveFileAsCommand}" />
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding NewModelCommand}" />
+        <KeyBinding Key="Z" Modifiers="Ctrl" Command="{Binding UndoCommand}" />
+        <KeyBinding Key="Y" Modifiers="Ctrl" Command="{Binding RedoCommand}" />
+        <KeyBinding Key="F5" Command="{Binding ApplyDaxExpressionCommand}" />
+    </Window.InputBindings>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- ===== MENU BAR ===== -->
+        <Menu DockPanel.Dock="Top" Background="{DynamicResource MenuBarBackground}"
+              Foreground="{DynamicResource PrimaryText}" Padding="2">
+
+            <!-- File Menu -->
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Model" Command="{Binding NewModelCommand}"
+                          InputGestureText="Ctrl+N">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📄" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Open..." Command="{Binding OpenFileCommand}"
+                          InputGestureText="Ctrl+O">
+                    <MenuItem.Icon>
+                        <TextBlock Text="📂" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="_Save" Command="{Binding SaveFileCommand}"
+                          InputGestureText="Ctrl+S">
+                    <MenuItem.Icon>
+                        <TextBlock Text="💾" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Save _As..." Command="{Binding SaveFileAsCommand}"
+                          InputGestureText="Ctrl+Shift+S" />
+                <Separator />
+                <MenuItem Header="E_xit" Click="ExitMenuItem_Click" InputGestureText="Alt+F4" />
+            </MenuItem>
+
+            <!-- Edit Menu -->
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo" Command="{Binding UndoCommand}"
+                          InputGestureText="Ctrl+Z">
+                    <MenuItem.Icon>
+                        <TextBlock Text="↩" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Redo" Command="{Binding RedoCommand}"
+                          InputGestureText="Ctrl+Y">
+                    <MenuItem.Icon>
+                        <TextBlock Text="↪" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Cu_t" InputGestureText="Ctrl+X" />
+                <MenuItem Header="_Copy" InputGestureText="Ctrl+C" />
+                <MenuItem Header="_Paste" InputGestureText="Ctrl+V" />
+                <Separator />
+                <MenuItem Header="_Delete" Command="{Binding DeleteNodeCommand}" InputGestureText="Del" />
+                <MenuItem Header="_Rename" Command="{Binding RenameNodeCommand}" InputGestureText="F2" />
+            </MenuItem>
+
+            <!-- View Menu -->
+            <MenuItem Header="_View">
+                <MenuItem Header="_Expand All" Command="{Binding ExpandAllCommand}" />
+                <MenuItem Header="_Collapse All" Command="{Binding CollapseAllCommand}" />
+                <Separator />
+                <MenuItem Header="_Toggle Theme" Command="{Binding ToggleThemeCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🌓" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+
+            <!-- Model Menu -->
+            <MenuItem Header="_Model">
+                <MenuItem Header="_Connect to Server..." IsEnabled="False">
+                    <MenuItem.Icon>
+                        <TextBlock Text="🔌" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Disconnect" IsEnabled="False" />
+                <Separator />
+                <MenuItem Header="_Refresh..." IsEnabled="False" />
+                <MenuItem Header="_Deploy..." IsEnabled="False" />
+                <Separator />
+                <MenuItem Header="Toggle _Hidden" Command="{Binding ToggleHiddenCommand}"
+                          InputGestureText="Ctrl+I" />
+            </MenuItem>
+
+            <!-- Tools Menu -->
+            <MenuItem Header="_Tools">
+                <MenuItem Header="_Preferences..." IsEnabled="False" />
+                <MenuItem Header="Keyboard _Shortcuts..." IsEnabled="False" />
+            </MenuItem>
+
+            <!-- Help Menu -->
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About TabularForge" Command="{Binding ShowAboutCommand}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="ℹ" FontSize="14" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <!-- ===== TOOLBAR ===== -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource ToolBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                Padding="4,2">
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding NewModelCommand}" ToolTip="New Model (Ctrl+N)"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="📄" FontSize="16" />
+                </Button>
+                <Button Command="{Binding OpenFileCommand}" ToolTip="Open File (Ctrl+O)"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="📂" FontSize="16" />
+                </Button>
+                <Button Command="{Binding SaveFileCommand}" ToolTip="Save (Ctrl+S)"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="💾" FontSize="16" />
+                </Button>
+
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
+                        Margin="6,2" />
+
+                <Button Command="{Binding UndoCommand}" ToolTip="{Binding UndoDescription}"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="↩" FontSize="16" />
+                </Button>
+                <Button Command="{Binding RedoCommand}" ToolTip="{Binding RedoDescription}"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="↪" FontSize="16" />
+                </Button>
+
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
+                        Margin="6,2" />
+
+                <Button ToolTip="Connect to Server" Padding="6,4" Margin="1,0"
+                        IsEnabled="False">
+                    <TextBlock Text="🔌" FontSize="16" />
+                </Button>
+                <Button ToolTip="Refresh" Padding="6,4" Margin="1,0"
+                        IsEnabled="False">
+                    <TextBlock Text="🔄" FontSize="16" />
+                </Button>
+
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
+                        Margin="6,2" />
+
+                <Button Command="{Binding ToggleThemeCommand}" ToolTip="Toggle Dark/Light Theme"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="🌓" FontSize="16" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- ===== STATUS BAR ===== -->
+        <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource StatusBarBackground}"
+                   Foreground="White" Padding="4,2">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⚡" Margin="0,0,4,0" />
+                    <TextBlock Text="{Binding ConnectionStatus}" />
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Background="#FFFFFF30" />
+            <StatusBarItem>
+                <TextBlock Text="{Binding ModelName}" />
+            </StatusBarItem>
+            <Separator Background="#FFFFFF30" />
+            <StatusBarItem>
+                <TextBlock Text="{Binding ObjectCount}" />
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding CursorPosition}" Margin="0,0,16,0" />
+                    <TextBlock Text="{Binding StatusMessage}" />
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+
+        <!-- ===== MAIN CONTENT: AvalonDock ===== -->
+        <avalonDock:DockingManager x:Name="DockManager"
+                                    AllowMixedOrientation="True"
+                                    Background="{DynamicResource EditorBackground}">
+
+            <avalonDock:LayoutRoot>
+                <avalonDock:LayoutPanel Orientation="Horizontal">
+
+                    <!-- LEFT: TOM Explorer -->
+                    <avalonDock:LayoutAnchorablePaneGroup DockWidth="300" Orientation="Vertical">
+                        <avalonDock:LayoutAnchorablePane>
+                            <avalonDock:LayoutAnchorable Title="TOM Explorer" ContentId="TomExplorer"
+                                                          CanHide="False" CanClose="False"
+                                                          AutoHideWidth="300">
+                                <views:TomExplorerPanel />
+                            </avalonDock:LayoutAnchorable>
+                        </avalonDock:LayoutAnchorablePane>
+                    </avalonDock:LayoutAnchorablePaneGroup>
+
+                    <!-- CENTER: Document area + Bottom panels -->
+                    <avalonDock:LayoutPanel Orientation="Vertical">
+
+                        <!-- Document Area (tabbed editors) -->
+                        <avalonDock:LayoutDocumentPaneGroup>
+                            <avalonDock:LayoutDocumentPane x:Name="DocumentPane">
+                                <avalonDock:LayoutDocument Title="Welcome" ContentId="Welcome"
+                                                           CanClose="True">
+                                    <views:WelcomePanel />
+                                </avalonDock:LayoutDocument>
+                            </avalonDock:LayoutDocumentPane>
+                        </avalonDock:LayoutDocumentPaneGroup>
+
+                        <!-- BOTTOM: Messages/Output -->
+                        <avalonDock:LayoutAnchorablePaneGroup DockHeight="200" Orientation="Horizontal">
+                            <avalonDock:LayoutAnchorablePane>
+                                <avalonDock:LayoutAnchorable Title="Messages" ContentId="Messages"
+                                                              CanHide="False" CanClose="False">
+                                    <views:MessagesPanel />
+                                </avalonDock:LayoutAnchorable>
+                                <avalonDock:LayoutAnchorable Title="Output" ContentId="Output"
+                                                              CanClose="False">
+                                    <views:OutputPanel />
+                                </avalonDock:LayoutAnchorable>
+                            </avalonDock:LayoutAnchorablePane>
+                        </avalonDock:LayoutAnchorablePaneGroup>
+
+                    </avalonDock:LayoutPanel>
+
+                    <!-- RIGHT: Properties -->
+                    <avalonDock:LayoutAnchorablePaneGroup DockWidth="300" Orientation="Vertical">
+                        <avalonDock:LayoutAnchorablePane>
+                            <avalonDock:LayoutAnchorable Title="Properties" ContentId="Properties"
+                                                          CanHide="False" CanClose="False"
+                                                          AutoHideWidth="300">
+                                <views:PropertiesPanel />
+                            </avalonDock:LayoutAnchorable>
+                        </avalonDock:LayoutAnchorablePane>
+                    </avalonDock:LayoutAnchorablePaneGroup>
+
+                </avalonDock:LayoutPanel>
+            </avalonDock:LayoutRoot>
+
+        </avalonDock:DockingManager>
+
+    </DockPanel>
+</Window>

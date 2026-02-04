@@ -1,0 +1,305 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="DAX" extensions=".dax;.msdax"
+    xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+  <Color name="Comment" foreground="#6A9955" fontStyle="italic" />
+  <Color name="String" foreground="#CE9178" />
+  <Color name="Number" foreground="#B5CEA8" />
+  <Color name="Keyword" foreground="#569CD6" fontWeight="bold" />
+  <Color name="Function" foreground="#DCDCAA" />
+  <Color name="Operator" foreground="#D4D4D4" />
+  <Color name="TableRef" foreground="#4EC9B0" />
+  <Color name="ColumnRef" foreground="#9CDCFE" />
+  <Color name="Boolean" foreground="#569CD6" />
+  <Color name="Variable" foreground="#C586C0" />
+
+  <RuleSet ignoreCase="true">
+    <!-- Comments -->
+    <Span color="Comment" begin="//" />
+    <Span color="Comment" multiline="true" begin="/\*" end="\*/" />
+
+    <!-- Strings -->
+    <Span color="String" begin="&quot;" end="&quot;" escapeCharacter="&quot;" />
+
+    <!-- Table references: 'TableName' -->
+    <Span color="TableRef" begin="'" end="'" />
+
+    <!-- Column references: [ColumnName] -->
+    <Span color="ColumnRef" begin="\[" end="\]" />
+
+    <!-- Numbers -->
+    <Rule color="Number">
+      \b\d+(\.\d+)?\b
+    </Rule>
+
+    <!-- Boolean and special values -->
+    <Keywords color="Boolean">
+      <Word>TRUE</Word>
+      <Word>FALSE</Word>
+      <Word>BLANK</Word>
+    </Keywords>
+
+    <!-- DAX Keywords -->
+    <Keywords color="Keyword">
+      <Word>EVALUATE</Word>
+      <Word>DEFINE</Word>
+      <Word>MEASURE</Word>
+      <Word>VAR</Word>
+      <Word>RETURN</Word>
+      <Word>ORDER</Word>
+      <Word>BY</Word>
+      <Word>ASC</Word>
+      <Word>DESC</Word>
+      <Word>IN</Word>
+      <Word>NOT</Word>
+      <Word>AND</Word>
+      <Word>OR</Word>
+      <Word>COLUMN</Word>
+      <Word>TABLE</Word>
+      <Word>START</Word>
+      <Word>AT</Word>
+      <Word>DENSE</Word>
+      <Word>SKIP</Word>
+    </Keywords>
+
+    <!-- Variable declarations -->
+    <Keywords color="Variable">
+      <Word>VAR</Word>
+      <Word>RETURN</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Aggregation -->
+    <Keywords color="Function">
+      <Word>SUM</Word>
+      <Word>SUMX</Word>
+      <Word>AVERAGE</Word>
+      <Word>AVERAGEX</Word>
+      <Word>MIN</Word>
+      <Word>MINX</Word>
+      <Word>MAX</Word>
+      <Word>MAXX</Word>
+      <Word>COUNT</Word>
+      <Word>COUNTX</Word>
+      <Word>COUNTA</Word>
+      <Word>COUNTAX</Word>
+      <Word>COUNTBLANK</Word>
+      <Word>COUNTROWS</Word>
+      <Word>DISTINCTCOUNT</Word>
+      <Word>DISTINCTCOUNTNOBLANK</Word>
+      <Word>PRODUCT</Word>
+      <Word>PRODUCTX</Word>
+      <Word>MEDIAN</Word>
+      <Word>MEDIANX</Word>
+      <Word>PERCENTILE</Word>
+      <Word>PERCENTILEX</Word>
+      <Word>STDEV</Word>
+      <Word>STDEVX</Word>
+      <Word>VAR</Word>
+      <Word>VARX</Word>
+      <Word>RANKX</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Filter -->
+    <Keywords color="Function">
+      <Word>CALCULATE</Word>
+      <Word>CALCULATETABLE</Word>
+      <Word>FILTER</Word>
+      <Word>ALL</Word>
+      <Word>ALLEXCEPT</Word>
+      <Word>ALLNOBLANKROW</Word>
+      <Word>ALLSELECTED</Word>
+      <Word>ALLCROSSFILTERED</Word>
+      <Word>REMOVEFILTERS</Word>
+      <Word>KEEPFILTERS</Word>
+      <Word>USERELATIONSHIP</Word>
+      <Word>CROSSFILTER</Word>
+      <Word>VALUES</Word>
+      <Word>DISTINCT</Word>
+      <Word>HASONEVALUE</Word>
+      <Word>HASONEFILTER</Word>
+      <Word>ISFILTERED</Word>
+      <Word>ISCROSSFILTERED</Word>
+      <Word>SELECTEDVALUE</Word>
+      <Word>EARLIER</Word>
+      <Word>EARLIEST</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Table -->
+    <Keywords color="Function">
+      <Word>ADDCOLUMNS</Word>
+      <Word>SELECTCOLUMNS</Word>
+      <Word>SUMMARIZE</Word>
+      <Word>SUMMARIZECOLUMNS</Word>
+      <Word>GROUPBY</Word>
+      <Word>CROSSJOIN</Word>
+      <Word>UNION</Word>
+      <Word>INTERSECT</Word>
+      <Word>EXCEPT</Word>
+      <Word>NATURALINNERJOIN</Word>
+      <Word>NATURALLEFTOUTERJOIN</Word>
+      <Word>TREATAS</Word>
+      <Word>DATATABLE</Word>
+      <Word>GENERATESERIES</Word>
+      <Word>GENERATE</Word>
+      <Word>GENERATEALL</Word>
+      <Word>ROW</Word>
+      <Word>TOPN</Word>
+      <Word>SAMPLE</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Relationship -->
+    <Keywords color="Function">
+      <Word>RELATED</Word>
+      <Word>RELATEDTABLE</Word>
+      <Word>LOOKUPVALUE</Word>
+      <Word>PATHCONTAINS</Word>
+      <Word>PATH</Word>
+      <Word>PATHITEM</Word>
+      <Word>PATHLENGTH</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Date/Time -->
+    <Keywords color="Function">
+      <Word>DATE</Word>
+      <Word>DATEVALUE</Word>
+      <Word>DAY</Word>
+      <Word>MONTH</Word>
+      <Word>YEAR</Word>
+      <Word>HOUR</Word>
+      <Word>MINUTE</Word>
+      <Word>SECOND</Word>
+      <Word>NOW</Word>
+      <Word>TODAY</Word>
+      <Word>UTCNOW</Word>
+      <Word>UTCTODAY</Word>
+      <Word>CALENDAR</Word>
+      <Word>CALENDARAUTO</Word>
+      <Word>DATEDIFF</Word>
+      <Word>DATEADD</Word>
+      <Word>EOMONTH</Word>
+      <Word>EDATE</Word>
+      <Word>WEEKDAY</Word>
+      <Word>WEEKNUM</Word>
+      <Word>YEARFRAC</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Time Intelligence -->
+    <Keywords color="Function">
+      <Word>DATESYTD</Word>
+      <Word>DATESQTD</Word>
+      <Word>DATESMTD</Word>
+      <Word>TOTALYTD</Word>
+      <Word>TOTALQTD</Word>
+      <Word>TOTALMTD</Word>
+      <Word>SAMEPERIODLASTYEAR</Word>
+      <Word>PREVIOUSDAY</Word>
+      <Word>PREVIOUSMONTH</Word>
+      <Word>PREVIOUSQUARTER</Word>
+      <Word>PREVIOUSYEAR</Word>
+      <Word>NEXTDAY</Word>
+      <Word>NEXTMONTH</Word>
+      <Word>NEXTQUARTER</Word>
+      <Word>NEXTYEAR</Word>
+      <Word>DATESBETWEEN</Word>
+      <Word>DATESINPERIOD</Word>
+      <Word>PARALLELPERIOD</Word>
+      <Word>STARTOFMONTH</Word>
+      <Word>STARTOFQUARTER</Word>
+      <Word>STARTOFYEAR</Word>
+      <Word>ENDOFMONTH</Word>
+      <Word>ENDOFQUARTER</Word>
+      <Word>ENDOFYEAR</Word>
+      <Word>CLOSINGBALANCEMONTH</Word>
+      <Word>CLOSINGBALANCEQUARTER</Word>
+      <Word>CLOSINGBALANCEYEAR</Word>
+      <Word>OPENINGBALANCEMONTH</Word>
+      <Word>OPENINGBALANCEQUARTER</Word>
+      <Word>OPENINGBALANCEYEAR</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Logical -->
+    <Keywords color="Function">
+      <Word>IF</Word>
+      <Word>IFERROR</Word>
+      <Word>SWITCH</Word>
+      <Word>COALESCE</Word>
+      <Word>ISBLANK</Word>
+      <Word>ISERROR</Word>
+      <Word>ISLOGICAL</Word>
+      <Word>ISNONTEXT</Word>
+      <Word>ISNUMBER</Word>
+      <Word>ISTEXT</Word>
+      <Word>ISEMPTY</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Text -->
+    <Keywords color="Function">
+      <Word>CONCATENATE</Word>
+      <Word>CONCATENATEX</Word>
+      <Word>FORMAT</Word>
+      <Word>LEFT</Word>
+      <Word>RIGHT</Word>
+      <Word>MID</Word>
+      <Word>LEN</Word>
+      <Word>UPPER</Word>
+      <Word>LOWER</Word>
+      <Word>TRIM</Word>
+      <Word>SUBSTITUTE</Word>
+      <Word>REPLACE</Word>
+      <Word>SEARCH</Word>
+      <Word>FIND</Word>
+      <Word>FIXED</Word>
+      <Word>REPT</Word>
+      <Word>UNICHAR</Word>
+      <Word>UNICODE</Word>
+      <Word>VALUE</Word>
+      <Word>COMBINEVALUES</Word>
+      <Word>EXACT</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Math -->
+    <Keywords color="Function">
+      <Word>ABS</Word>
+      <Word>CEILING</Word>
+      <Word>FLOOR</Word>
+      <Word>ROUND</Word>
+      <Word>ROUNDUP</Word>
+      <Word>ROUNDDOWN</Word>
+      <Word>TRUNC</Word>
+      <Word>INT</Word>
+      <Word>MOD</Word>
+      <Word>POWER</Word>
+      <Word>SQRT</Word>
+      <Word>EXP</Word>
+      <Word>LN</Word>
+      <Word>LOG</Word>
+      <Word>LOG10</Word>
+      <Word>PI</Word>
+      <Word>SIGN</Word>
+      <Word>DIVIDE</Word>
+      <Word>QUOTIENT</Word>
+      <Word>RAND</Word>
+      <Word>RANDBETWEEN</Word>
+      <Word>CONVERT</Word>
+      <Word>CURRENCY</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Information -->
+    <Keywords color="Function">
+      <Word>USERPRINCIPALNAME</Word>
+      <Word>USERNAME</Word>
+      <Word>CUSTOMDATA</Word>
+      <Word>ISAFTER</Word>
+      <Word>ISINSCOPE</Word>
+      <Word>ISSELECTEDMEASURE</Word>
+      <Word>SELECTEDMEASURE</Word>
+      <Word>SELECTEDMEASURENAME</Word>
+      <Word>SELECTEDMEASUREFORMATSTRING</Word>
+      <Word>CONTAINS</Word>
+      <Word>CONTAINSROW</Word>
+      <Word>CONTAINSSTRING</Word>
+      <Word>CONTAINSSTRINGEXACT</Word>
+    </Keywords>
+
+  </RuleSet>
+</SyntaxDefinition>

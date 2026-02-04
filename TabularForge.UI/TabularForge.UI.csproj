@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>TabularForge.UI</RootNamespace>
+    <!-- <ApplicationIcon>Resources\app.ico</ApplicationIcon> -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TabularForge.Core\TabularForge.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="SyntaxHighlighting\DAX.xshd" />
+  </ItemGroup>
+
+</Project>

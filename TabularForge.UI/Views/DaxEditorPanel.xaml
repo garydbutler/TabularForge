@@ -1,0 +1,42 @@
+<UserControl x:Class="TabularForge.UI.Views.DaxEditorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             mc:Ignorable="d"
+             Background="{DynamicResource EditorBackground}">
+
+    <DockPanel>
+        <!-- DAX Editor Header Bar -->
+        <Border DockPanel.Dock="Top" Padding="8,4"
+                Background="{DynamicResource TabBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <TextBlock Text="{Binding DaxEditorTitle}"
+                           Foreground="{DynamicResource PrimaryText}"
+                           FontSize="12" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Apply (F5)" Command="{Binding ApplyDaxExpressionCommand}"
+                            Padding="8,3" FontSize="11"
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ButtonText}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- AvalonEdit DAX Editor -->
+        <avalonedit:TextEditor x:Name="DaxEditor"
+                                FontFamily="Cascadia Code, Consolas, Courier New"
+                                FontSize="13"
+                                ShowLineNumbers="True"
+                                WordWrap="False"
+                                Background="{DynamicResource EditorBackground}"
+                                Foreground="{DynamicResource PrimaryText}"
+                                LineNumbersForeground="{DynamicResource SecondaryText}"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto"
+                                Padding="4"
+                                TextChanged="DaxEditor_TextChanged" />
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,23 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.log
+
+## VS
+.vs/
+*.DotSettings.user
+launchSettings.json
+
+## NuGet
+packages/
+*.nupkg
+
+## OS
+Thumbs.db
+.DS_Store

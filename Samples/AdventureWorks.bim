@@ -1,0 +1,548 @@
+{
+  "name": "SemanticModel",
+  "compatibilityLevel": 1600,
+  "model": {
+    "name": "Adventure Works Sales",
+    "description": "Sample Adventure Works Sales model for TabularForge testing",
+    "culture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "dataSources": [
+      {
+        "name": "AdventureWorksDW",
+        "type": "structured",
+        "connectionDetails": {
+          "protocol": "tds",
+          "address": {
+            "server": "localhost",
+            "database": "AdventureWorksDW2019"
+          }
+        },
+        "description": "Connection to Adventure Works Data Warehouse"
+      }
+    ],
+    "tables": [
+      {
+        "name": "Sales",
+        "description": "Fact table containing sales transactions",
+        "columns": [
+          {
+            "name": "SalesOrderID",
+            "dataType": "int64",
+            "sourceColumn": "SalesOrderID",
+            "description": "Unique identifier for each sales order"
+          },
+          {
+            "name": "OrderDate",
+            "dataType": "dateTime",
+            "sourceColumn": "OrderDate",
+            "formatString": "yyyy-MM-dd",
+            "description": "Date the order was placed"
+          },
+          {
+            "name": "ProductKey",
+            "dataType": "int64",
+            "sourceColumn": "ProductKey",
+            "isHidden": true,
+            "description": "Foreign key to Product table"
+          },
+          {
+            "name": "CustomerKey",
+            "dataType": "int64",
+            "sourceColumn": "CustomerKey",
+            "isHidden": true,
+            "description": "Foreign key to Customer table"
+          },
+          {
+            "name": "SalesAmount",
+            "dataType": "decimal",
+            "sourceColumn": "SalesAmount",
+            "formatString": "$#,##0.00",
+            "description": "Total sales amount for the line item"
+          },
+          {
+            "name": "OrderQuantity",
+            "dataType": "int64",
+            "sourceColumn": "OrderQuantity",
+            "description": "Number of units ordered"
+          },
+          {
+            "name": "UnitPrice",
+            "dataType": "decimal",
+            "sourceColumn": "UnitPrice",
+            "formatString": "$#,##0.00",
+            "description": "Price per unit"
+          },
+          {
+            "name": "TotalCost",
+            "dataType": "decimal",
+            "sourceColumn": "TotalProductCost",
+            "formatString": "$#,##0.00",
+            "description": "Total cost of goods"
+          },
+          {
+            "name": "Profit",
+            "dataType": "decimal",
+            "type": "calculated",
+            "expression": "[SalesAmount] - [TotalCost]",
+            "formatString": "$#,##0.00",
+            "description": "Calculated profit per line"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Total Sales",
+            "expression": "SUM( 'Sales'[SalesAmount] )",
+            "formatString": "$#,##0.00",
+            "description": "Sum of all sales amounts",
+            "displayFolder": "Revenue"
+          },
+          {
+            "name": "Total Orders",
+            "expression": "DISTINCTCOUNT( 'Sales'[SalesOrderID] )",
+            "formatString": "#,##0",
+            "description": "Count of distinct sales orders",
+            "displayFolder": "Volume"
+          },
+          {
+            "name": "Average Order Value",
+            "expression": [
+              "DIVIDE(",
+              "    [Total Sales],",
+              "    [Total Orders],",
+              "    BLANK()",
+              ")"
+            ],
+            "formatString": "$#,##0.00",
+            "description": "Average value per order",
+            "displayFolder": "Revenue"
+          },
+          {
+            "name": "Total Profit",
+            "expression": "SUMX( 'Sales', 'Sales'[SalesAmount] - 'Sales'[TotalCost] )",
+            "formatString": "$#,##0.00",
+            "description": "Total profit across all transactions",
+            "displayFolder": "Profitability"
+          },
+          {
+            "name": "Profit Margin",
+            "expression": [
+              "VAR TotalRevenue = [Total Sales]",
+              "VAR TotalProfit = [Total Profit]",
+              "RETURN",
+              "    DIVIDE( TotalProfit, TotalRevenue, BLANK() )"
+            ],
+            "formatString": "0.0%",
+            "description": "Profit as a percentage of revenue",
+            "displayFolder": "Profitability"
+          },
+          {
+            "name": "Sales YTD",
+            "expression": "TOTALYTD( [Total Sales], 'Calendar'[Date] )",
+            "formatString": "$#,##0.00",
+            "description": "Year-to-date total sales",
+            "displayFolder": "Time Intelligence"
+          },
+          {
+            "name": "Sales vs Prior Year",
+            "expression": [
+              "VAR CurrentSales = [Total Sales]",
+              "VAR PriorYearSales = CALCULATE(",
+              "    [Total Sales],",
+              "    SAMEPERIODLASTYEAR( 'Calendar'[Date] )",
+              ")",
+              "RETURN",
+              "    CurrentSales - PriorYearSales"
+            ],
+            "formatString": "$#,##0.00",
+            "description": "Difference in sales compared to same period last year",
+            "displayFolder": "Time Intelligence"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Sales-Partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Sql.Database(\"localhost\", \"AdventureWorksDW2019\"),\n    dbo_FactInternetSales = Source{[Schema=\"dbo\",Item=\"FactInternetSales\"]}[Data]\nin\n    dbo_FactInternetSales"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Product",
+        "description": "Product dimension table",
+        "columns": [
+          {
+            "name": "ProductKey",
+            "dataType": "int64",
+            "sourceColumn": "ProductKey",
+            "isHidden": true,
+            "description": "Primary key for product"
+          },
+          {
+            "name": "Product Name",
+            "dataType": "string",
+            "sourceColumn": "EnglishProductName",
+            "description": "Name of the product"
+          },
+          {
+            "name": "Category",
+            "dataType": "string",
+            "sourceColumn": "ProductCategoryName",
+            "description": "Product category (Bikes, Accessories, Clothing, Components)"
+          },
+          {
+            "name": "Subcategory",
+            "dataType": "string",
+            "sourceColumn": "ProductSubcategoryName",
+            "description": "Product subcategory"
+          },
+          {
+            "name": "Color",
+            "dataType": "string",
+            "sourceColumn": "Color",
+            "description": "Product color"
+          },
+          {
+            "name": "List Price",
+            "dataType": "decimal",
+            "sourceColumn": "ListPrice",
+            "formatString": "$#,##0.00",
+            "description": "Standard list price"
+          },
+          {
+            "name": "Standard Cost",
+            "dataType": "decimal",
+            "sourceColumn": "StandardCost",
+            "formatString": "$#,##0.00",
+            "description": "Standard cost to produce"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Product Count",
+            "expression": "COUNTROWS( 'Product' )",
+            "formatString": "#,##0",
+            "description": "Number of distinct products"
+          },
+          {
+            "name": "Avg List Price",
+            "expression": "AVERAGE( 'Product'[List Price] )",
+            "formatString": "$#,##0.00",
+            "description": "Average list price across all products"
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Product Hierarchy",
+            "description": "Category > Subcategory > Product drill-down",
+            "levels": [
+              {
+                "name": "Category",
+                "ordinal": 0,
+                "column": "Category"
+              },
+              {
+                "name": "Subcategory",
+                "ordinal": 1,
+                "column": "Subcategory"
+              },
+              {
+                "name": "Product Name",
+                "ordinal": 2,
+                "column": "Product Name"
+              }
+            ]
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Product-Partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Sql.Database(\"localhost\", \"AdventureWorksDW2019\"),\n    dbo_DimProduct = Source{[Schema=\"dbo\",Item=\"DimProduct\"]}[Data]\nin\n    dbo_DimProduct"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Customer",
+        "description": "Customer dimension table",
+        "columns": [
+          {
+            "name": "CustomerKey",
+            "dataType": "int64",
+            "sourceColumn": "CustomerKey",
+            "isHidden": true,
+            "description": "Primary key for customer"
+          },
+          {
+            "name": "Full Name",
+            "dataType": "string",
+            "sourceColumn": "FullName",
+            "description": "Customer full name"
+          },
+          {
+            "name": "Email",
+            "dataType": "string",
+            "sourceColumn": "EmailAddress",
+            "description": "Customer email address"
+          },
+          {
+            "name": "City",
+            "dataType": "string",
+            "sourceColumn": "City",
+            "description": "Customer city"
+          },
+          {
+            "name": "State",
+            "dataType": "string",
+            "sourceColumn": "StateProvinceName",
+            "description": "Customer state/province"
+          },
+          {
+            "name": "Country",
+            "dataType": "string",
+            "sourceColumn": "CountryRegionName",
+            "description": "Customer country"
+          },
+          {
+            "name": "Gender",
+            "dataType": "string",
+            "sourceColumn": "Gender",
+            "description": "Customer gender (M/F)"
+          },
+          {
+            "name": "Income Bracket",
+            "dataType": "string",
+            "type": "calculated",
+            "expression": "IF( 'Customer'[YearlyIncome] > 100000, \"High\", IF( 'Customer'[YearlyIncome] > 50000, \"Medium\", \"Low\" ) )",
+            "description": "Calculated income bracket"
+          },
+          {
+            "name": "YearlyIncome",
+            "dataType": "decimal",
+            "sourceColumn": "YearlyIncome",
+            "formatString": "$#,##0.00",
+            "isHidden": true,
+            "description": "Annual income (used for calculations)"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Customer Count",
+            "expression": "DISTINCTCOUNT( 'Sales'[CustomerKey] )",
+            "formatString": "#,##0",
+            "description": "Count of distinct customers with orders"
+          },
+          {
+            "name": "Revenue Per Customer",
+            "expression": [
+              "DIVIDE(",
+              "    [Total Sales],",
+              "    [Customer Count],",
+              "    BLANK()",
+              ")"
+            ],
+            "formatString": "$#,##0.00",
+            "description": "Average revenue per customer"
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Geography",
+            "description": "Country > State > City drill-down",
+            "levels": [
+              {
+                "name": "Country",
+                "ordinal": 0,
+                "column": "Country"
+              },
+              {
+                "name": "State",
+                "ordinal": 1,
+                "column": "State"
+              },
+              {
+                "name": "City",
+                "ordinal": 2,
+                "column": "City"
+              }
+            ]
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Customer-Partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Sql.Database(\"localhost\", \"AdventureWorksDW2019\"),\n    dbo_DimCustomer = Source{[Schema=\"dbo\",Item=\"DimCustomer\"]}[Data]\nin\n    dbo_DimCustomer"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Calendar",
+        "description": "Date dimension / calendar table",
+        "columns": [
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "DateKey",
+            "formatString": "yyyy-MM-dd",
+            "description": "Calendar date"
+          },
+          {
+            "name": "Year",
+            "dataType": "int64",
+            "sourceColumn": "CalendarYear",
+            "description": "Calendar year"
+          },
+          {
+            "name": "Quarter",
+            "dataType": "string",
+            "sourceColumn": "CalendarQuarter",
+            "description": "Calendar quarter (Q1-Q4)"
+          },
+          {
+            "name": "Month",
+            "dataType": "string",
+            "sourceColumn": "EnglishMonthName",
+            "description": "Month name"
+          },
+          {
+            "name": "Month Number",
+            "dataType": "int64",
+            "sourceColumn": "MonthNumberOfYear",
+            "isHidden": true,
+            "description": "Month number (1-12)"
+          },
+          {
+            "name": "Day of Week",
+            "dataType": "string",
+            "sourceColumn": "EnglishDayNameOfWeek",
+            "description": "Day of week name"
+          },
+          {
+            "name": "Is Weekend",
+            "dataType": "boolean",
+            "type": "calculated",
+            "expression": "WEEKDAY( 'Calendar'[Date], 2 ) > 5",
+            "description": "Whether the date falls on a weekend"
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Date Hierarchy",
+            "description": "Year > Quarter > Month > Date drill-down",
+            "levels": [
+              {
+                "name": "Year",
+                "ordinal": 0,
+                "column": "Year"
+              },
+              {
+                "name": "Quarter",
+                "ordinal": 1,
+                "column": "Quarter"
+              },
+              {
+                "name": "Month",
+                "ordinal": 2,
+                "column": "Month"
+              },
+              {
+                "name": "Date",
+                "ordinal": 3,
+                "column": "Date"
+              }
+            ]
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Calendar-Partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Sql.Database(\"localhost\", \"AdventureWorksDW2019\"),\n    dbo_DimDate = Source{[Schema=\"dbo\",Item=\"DimDate\"]}[Data]\nin\n    dbo_DimDate"
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "Sales_Product",
+        "fromTable": "Sales",
+        "fromColumn": "ProductKey",
+        "toTable": "Product",
+        "toColumn": "ProductKey",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "Sales_Customer",
+        "fromTable": "Sales",
+        "fromColumn": "CustomerKey",
+        "toTable": "Customer",
+        "toColumn": "CustomerKey",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "Sales_Calendar",
+        "fromTable": "Sales",
+        "fromColumn": "OrderDate",
+        "toTable": "Calendar",
+        "toColumn": "Date",
+        "crossFilteringBehavior": "oneDirection"
+      }
+    ],
+    "roles": [
+      {
+        "name": "Reader",
+        "description": "Read-only access to the model",
+        "modelPermission": "read"
+      },
+      {
+        "name": "Admin",
+        "description": "Full admin access",
+        "modelPermission": "administrator"
+      }
+    ],
+    "perspectives": [
+      {
+        "name": "Sales Analysis",
+        "tables": [
+          { "name": "Sales" },
+          { "name": "Product" },
+          { "name": "Calendar" }
+        ]
+      },
+      {
+        "name": "Customer Analysis",
+        "tables": [
+          { "name": "Sales" },
+          { "name": "Customer" },
+          { "name": "Calendar" }
+        ]
+      }
+    ],
+    "cultures": [
+      {
+        "name": "en-US",
+        "linguisticMetadata": {
+          "content": {}
+        }
+      }
+    ],
+    "annotations": [
+      {
+        "name": "TabularEditor_Version",
+        "value": "TabularForge 1.0.0"
+      }
+    ]
+  }
+}
