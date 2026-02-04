@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="SyntaxHighlighting\DAX.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\DAX.xshd" />
   </ItemGroup>
 
 </Project>
