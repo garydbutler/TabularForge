@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TabularForge.Core\TabularForge.Core.csproj" />
+    <ProjectReference Include="..\TabularForge.DAXParser\TabularForge.DAXParser.csproj" />
   </ItemGroup>
 
   <ItemGroup>

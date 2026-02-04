@@ -29,6 +29,7 @@ public partial class App : Application
 
         mainVm.AddMessage("TabularForge started.");
         mainVm.AddMessage($"Runtime: .NET {Environment.Version}");
+        mainVm.AddMessage("Phase 2: Editor Enhancement loaded.");
         mainVm.AddMessage("Ready. Open a .bim file to begin.");
 
         mainWindow.Show();
@@ -48,6 +49,7 @@ public partial class App : Application
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
+        services.AddSingleton<ErrorListViewModel>();
     }
 
     protected override void OnExit(ExitEventArgs e)

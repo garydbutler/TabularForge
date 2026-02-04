@@ -30,6 +30,7 @@
         <KeyBinding Key="Z" Modifiers="Ctrl" Command="{Binding UndoCommand}" />
         <KeyBinding Key="Y" Modifiers="Ctrl" Command="{Binding RedoCommand}" />
         <KeyBinding Key="F5" Command="{Binding ApplyDaxExpressionCommand}" />
+        <KeyBinding Key="D" Modifiers="Ctrl+Shift" Command="{Binding OpenDaxScriptCommand}" />
     </Window.InputBindings>
 
     <DockPanel LastChildFill="True">
@@ -43,22 +44,14 @@
                 <MenuItem Header="_New Model" Command="{Binding NewModelCommand}"
                           InputGestureText="Ctrl+N">
                     <MenuItem.Icon>
-                        <TextBlock Text="📄" FontSize="14" />
+                        <TextBlock Text="+" FontSize="14" FontWeight="Bold" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="_Open..." Command="{Binding OpenFileCommand}"
-                          InputGestureText="Ctrl+O">
-                    <MenuItem.Icon>
-                        <TextBlock Text="📂" FontSize="14" />
-                    </MenuItem.Icon>
-                </MenuItem>
+                          InputGestureText="Ctrl+O" />
                 <Separator />
                 <MenuItem Header="_Save" Command="{Binding SaveFileCommand}"
-                          InputGestureText="Ctrl+S">
-                    <MenuItem.Icon>
-                        <TextBlock Text="💾" FontSize="14" />
-                    </MenuItem.Icon>
-                </MenuItem>
+                          InputGestureText="Ctrl+S" />
                 <MenuItem Header="Save _As..." Command="{Binding SaveFileAsCommand}"
                           InputGestureText="Ctrl+Shift+S" />
                 <Separator />
@@ -68,21 +61,16 @@
             <!-- Edit Menu -->
             <MenuItem Header="_Edit">
                 <MenuItem Header="_Undo" Command="{Binding UndoCommand}"
-                          InputGestureText="Ctrl+Z">
-                    <MenuItem.Icon>
-                        <TextBlock Text="↩" FontSize="14" />
-                    </MenuItem.Icon>
-                </MenuItem>
+                          InputGestureText="Ctrl+Z" />
                 <MenuItem Header="_Redo" Command="{Binding RedoCommand}"
-                          InputGestureText="Ctrl+Y">
-                    <MenuItem.Icon>
-                        <TextBlock Text="↪" FontSize="14" />
-                    </MenuItem.Icon>
-                </MenuItem>
+                          InputGestureText="Ctrl+Y" />
                 <Separator />
                 <MenuItem Header="Cu_t" InputGestureText="Ctrl+X" />
                 <MenuItem Header="_Copy" InputGestureText="Ctrl+C" />
                 <MenuItem Header="_Paste" InputGestureText="Ctrl+V" />
+                <Separator />
+                <MenuItem Header="_Find..." InputGestureText="Ctrl+F" />
+                <MenuItem Header="Find and _Replace..." InputGestureText="Ctrl+H" />
                 <Separator />
                 <MenuItem Header="_Delete" Command="{Binding DeleteNodeCommand}" InputGestureText="Del" />
                 <MenuItem Header="_Rename" Command="{Binding RenameNodeCommand}" InputGestureText="F2" />
@@ -93,20 +81,15 @@
                 <MenuItem Header="_Expand All" Command="{Binding ExpandAllCommand}" />
                 <MenuItem Header="_Collapse All" Command="{Binding CollapseAllCommand}" />
                 <Separator />
-                <MenuItem Header="_Toggle Theme" Command="{Binding ToggleThemeCommand}">
-                    <MenuItem.Icon>
-                        <TextBlock Text="🌓" FontSize="14" />
-                    </MenuItem.Icon>
-                </MenuItem>
+                <MenuItem Header="_DAX Script" Command="{Binding OpenDaxScriptCommand}"
+                          InputGestureText="Ctrl+Shift+D" />
+                <Separator />
+                <MenuItem Header="_Toggle Theme" Command="{Binding ToggleThemeCommand}" />
             </MenuItem>
 
             <!-- Model Menu -->
             <MenuItem Header="_Model">
-                <MenuItem Header="_Connect to Server..." IsEnabled="False">
-                    <MenuItem.Icon>
-                        <TextBlock Text="🔌" FontSize="14" />
-                    </MenuItem.Icon>
-                </MenuItem>
+                <MenuItem Header="_Connect to Server..." IsEnabled="False" />
                 <MenuItem Header="_Disconnect" IsEnabled="False" />
                 <Separator />
                 <MenuItem Header="_Refresh..." IsEnabled="False" />
@@ -114,6 +97,8 @@
                 <Separator />
                 <MenuItem Header="Toggle _Hidden" Command="{Binding ToggleHiddenCommand}"
                           InputGestureText="Ctrl+I" />
+                <Separator />
+                <MenuItem Header="_Check DAX Semantics" Command="{Binding CheckDaxSemanticsCommand}" />
             </MenuItem>
 
             <!-- Tools Menu -->
@@ -124,11 +109,7 @@
 
             <!-- Help Menu -->
             <MenuItem Header="_Help">
-                <MenuItem Header="_About TabularForge" Command="{Binding ShowAboutCommand}">
-                    <MenuItem.Icon>
-                        <TextBlock Text="ℹ" FontSize="14" />
-                    </MenuItem.Icon>
-                </MenuItem>
+                <MenuItem Header="_About TabularForge" Command="{Binding ShowAboutCommand}" />
             </MenuItem>
         </Menu>
 
@@ -139,15 +120,15 @@
             <StackPanel Orientation="Horizontal">
                 <Button Command="{Binding NewModelCommand}" ToolTip="New Model (Ctrl+N)"
                         Padding="6,4" Margin="1,0">
-                    <TextBlock Text="📄" FontSize="16" />
+                    <TextBlock Text="+" FontSize="16" FontWeight="Bold" />
                 </Button>
                 <Button Command="{Binding OpenFileCommand}" ToolTip="Open File (Ctrl+O)"
                         Padding="6,4" Margin="1,0">
-                    <TextBlock Text="📂" FontSize="16" />
+                    <TextBlock Text="Open" FontSize="12" />
                 </Button>
                 <Button Command="{Binding SaveFileCommand}" ToolTip="Save (Ctrl+S)"
                         Padding="6,4" Margin="1,0">
-                    <TextBlock Text="💾" FontSize="16" />
+                    <TextBlock Text="Save" FontSize="12" />
                 </Button>
 
                 <Border Width="1" Background="{DynamicResource SeparatorBrush}"
@@ -155,11 +136,23 @@
 
                 <Button Command="{Binding UndoCommand}" ToolTip="{Binding UndoDescription}"
                         Padding="6,4" Margin="1,0">
-                    <TextBlock Text="↩" FontSize="16" />
+                    <TextBlock Text="Undo" FontSize="12" />
                 </Button>
                 <Button Command="{Binding RedoCommand}" ToolTip="{Binding RedoDescription}"
                         Padding="6,4" Margin="1,0">
-                    <TextBlock Text="↪" FontSize="16" />
+                    <TextBlock Text="Redo" FontSize="12" />
+                </Button>
+
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
+                        Margin="6,2" />
+
+                <Button Command="{Binding CheckDaxSemanticsCommand}" ToolTip="Check DAX Semantics"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Check" FontSize="12" />
+                </Button>
+                <Button Command="{Binding OpenDaxScriptCommand}" ToolTip="DAX Script (Ctrl+Shift+D)"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Script" FontSize="12" />
                 </Button>
 
                 <Border Width="1" Background="{DynamicResource SeparatorBrush}"
@@ -167,11 +160,7 @@
 
                 <Button ToolTip="Connect to Server" Padding="6,4" Margin="1,0"
                         IsEnabled="False">
-                    <TextBlock Text="🔌" FontSize="16" />
-                </Button>
-                <Button ToolTip="Refresh" Padding="6,4" Margin="1,0"
-                        IsEnabled="False">
-                    <TextBlock Text="🔄" FontSize="16" />
+                    <TextBlock Text="Connect" FontSize="12" />
                 </Button>
 
                 <Border Width="1" Background="{DynamicResource SeparatorBrush}"
@@ -179,7 +168,7 @@
 
                 <Button Command="{Binding ToggleThemeCommand}" ToolTip="Toggle Dark/Light Theme"
                         Padding="6,4" Margin="1,0">
-                    <TextBlock Text="🌓" FontSize="16" />
+                    <TextBlock Text="Theme" FontSize="12" />
                 </Button>
             </StackPanel>
         </Border>
@@ -189,7 +178,7 @@
                    Foreground="White" Padding="4,2">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="⚡" Margin="0,0,4,0" />
+                    <TextBlock Text="*" Margin="0,0,4,0" FontWeight="Bold" />
                     <TextBlock Text="{Binding ConnectionStatus}" />
                 </StackPanel>
             </StatusBarItem>
@@ -241,7 +230,7 @@
                             </avalonDock:LayoutDocumentPane>
                         </avalonDock:LayoutDocumentPaneGroup>
 
-                        <!-- BOTTOM: Messages/Output -->
+                        <!-- BOTTOM: Messages/Output/Error List -->
                         <avalonDock:LayoutAnchorablePaneGroup DockHeight="200" Orientation="Horizontal">
                             <avalonDock:LayoutAnchorablePane>
                                 <avalonDock:LayoutAnchorable Title="Messages" ContentId="Messages"
@@ -251,6 +240,10 @@
                                 <avalonDock:LayoutAnchorable Title="Output" ContentId="Output"
                                                               CanClose="False">
                                     <views:OutputPanel />
+                                </avalonDock:LayoutAnchorable>
+                                <avalonDock:LayoutAnchorable Title="Error List" ContentId="ErrorList"
+                                                              CanClose="False">
+                                    <views:ErrorListPanel />
                                 </avalonDock:LayoutAnchorable>
                             </avalonDock:LayoutAnchorablePane>
                         </avalonDock:LayoutAnchorablePaneGroup>

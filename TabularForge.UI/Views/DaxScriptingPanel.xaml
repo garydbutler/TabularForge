@@ -1,0 +1,48 @@
+<UserControl x:Class="TabularForge.UI.Views.DaxScriptingPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             mc:Ignorable="d"
+             Background="{DynamicResource EditorBackground}">
+
+    <DockPanel>
+        <!-- Header Bar -->
+        <Border DockPanel.Dock="Top" Padding="8,4"
+                Background="{DynamicResource TabBarBackground}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <TextBlock Text="DAX Script" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryText}"
+                           VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Check" Click="CheckButton_Click"
+                            Padding="8,3" Margin="0,0,4,0" FontSize="11"
+                            ToolTip="Validate DAX script" />
+                    <Button Content="Format" Click="FormatButton_Click"
+                            Padding="8,3" Margin="0,0,4,0" FontSize="11"
+                            ToolTip="Format DAX script" />
+                    <Button Content="Apply to Model" Click="ApplyButton_Click"
+                            Padding="8,3" FontSize="11"
+                            Background="{DynamicResource ButtonBackground}"
+                            Foreground="{DynamicResource ButtonText}"
+                            ToolTip="Apply script definitions back to model" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Script Editor -->
+        <avalonedit:TextEditor x:Name="ScriptEditor"
+                                FontFamily="Cascadia Code, Consolas, Courier New"
+                                FontSize="13"
+                                ShowLineNumbers="True"
+                                WordWrap="False"
+                                Background="{DynamicResource EditorBackground}"
+                                Foreground="{DynamicResource PrimaryText}"
+                                LineNumbersForeground="{DynamicResource SecondaryText}"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto"
+                                Padding="4" />
+    </DockPanel>
+</UserControl>
