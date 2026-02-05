@@ -620,17 +620,16 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void CheckDaxSemantics()
     {
-        if (string.IsNullOrEmpty(DaxEditorContent)) return;
+        if (SelectedNode == null || string.IsNullOrEmpty(DaxEditorContent)) return;
 
         var modelInfo = BuildModelInfo();
         var analyzer = new DaxSemanticAnalyzer(modelInfo);
-        var sourceName = SelectedNode?.Name ?? "DAX Editor";
-        var diagnostics = analyzer.Analyze(DaxEditorContent, sourceName);
+        var diagnostics = analyzer.Analyze(DaxEditorContent, SelectedNode.Name);
 
         ErrorList.UpdateDiagnostics(diagnostics);
         var errorCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Error);
         var warnCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Warning);
-        AddMessage($"Semantic check for '{sourceName}': {errorCount} errors, {warnCount} warnings");
+        AddMessage($"Semantic check for '{SelectedNode.Name}': {errorCount} errors, {warnCount} warnings");
     }
 
     // ===========================
