@@ -624,12 +624,34 @@ public partial class MainViewModel : ObservableObject
 
         var modelInfo = BuildModelInfo();
         var analyzer = new DaxSemanticAnalyzer(modelInfo);
-        var diagnostics = analyzer.Analyze(DaxEditorContent, SelectedNode.Name);
+        var diagnostics = analyzer.Analyze(DaxEditorContent, SelectedNode.Name).ToList();
 
         ErrorList.UpdateDiagnostics(diagnostics);
         var errorCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Error);
         var warnCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Warning);
-        AddMessage($"Semantic check for '{SelectedNode.Name}': {errorCount} errors, {warnCount} warnings");
+
+        if (diagnostics.Count == 0)
+        {
+            AddMessage($"✓ Semantic check passed for '{SelectedNode.Name}' - no issues found.");
+        }
+        else
+        {
+            AddMessage($"Semantic check for '{SelectedNode.Name}': {errorCount} error{(errorCount != 1 ? "s" : "")}, {warnCount} warning{(warnCount != 1 ? "s" : "")}");
+
+            // Show first few diagnostics directly in Messages for immediate visibility
+            var toShow = diagnostics.Take(5).ToList();
+            foreach (var d in toShow)
+            {
+                var prefix = d.Severity == DaxDiagnosticSeverity.Error ? "  Error" : "  Warning";
+                var location = d.Line > 0 ? $" (Ln {d.Line}, Col {d.Column})" : "";
+                AddMessage($"{prefix}{location}: {d.Message}");
+            }
+
+            if (diagnostics.Count > 5)
+            {
+                AddMessage($"  ... and {diagnostics.Count - 5} more. See Error List panel for all issues.");
+            }
+        }
     }
 
     // ===========================

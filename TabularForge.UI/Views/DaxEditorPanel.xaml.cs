@@ -104,6 +104,12 @@ public partial class DaxEditorPanel : UserControl
             ShowCompletionWindow();
             e.Handled = true;
         }
+        // Ctrl+F7 - Check DAX
+        else if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            CheckDaxSyntax();
+            e.Handled = true;
+        }
         // Escape - close Find/Replace
         else if (e.Key == Key.Escape && _findReplaceVisible)
         {
@@ -554,6 +560,28 @@ public partial class DaxEditorPanel : UserControl
                 ?? (Application.Current.MainWindow?.DataContext as MainViewModel);
             vm?.AddMessage($"Format error: {ex.Message}");
         }
+    }
+
+    // === DAX Syntax Checking ===
+
+    private void CheckButton_Click(object sender, RoutedEventArgs e)
+    {
+        CheckDaxSyntax();
+    }
+
+    private void CheckDaxSyntax()
+    {
+        if (string.IsNullOrWhiteSpace(DaxEditor.Text))
+        {
+            var vm = DataContext as MainViewModel
+                ?? (Application.Current.MainWindow?.DataContext as MainViewModel);
+            vm?.AddMessage("Nothing to check - editor is empty.");
+            return;
+        }
+
+        var vm2 = DataContext as MainViewModel
+            ?? (Application.Current.MainWindow?.DataContext as MainViewModel);
+        vm2?.CheckDaxSemanticsCommand.Execute(null);
     }
 
     // === Syntax Highlighting ===

@@ -20,6 +20,9 @@
                     <Button Content="Format" Click="FormatButton_Click"
                             Padding="8,3" Margin="0,0,4,0" FontSize="11"
                             ToolTip="Format DAX expression (Ctrl+Shift+F)" />
+                    <Button Content="Check" Click="CheckButton_Click"
+                            Padding="8,3" Margin="0,0,4,0" FontSize="11"
+                            ToolTip="Check DAX syntax and semantics (Ctrl+F7)" />
                     <Button Content="Apply (F5)" Command="{Binding ApplyDaxExpressionCommand}"
                             Padding="8,3" FontSize="11"
                             Background="{DynamicResource ButtonBackground}"

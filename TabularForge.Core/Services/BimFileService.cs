@@ -93,6 +93,25 @@ public class BimFileService
         }
     }
 
+    /// <summary>
+    /// Extracts expression text from a JSON object, handling both string and array formats.
+    /// BIM files may store multi-line expressions as arrays of strings per TMDL spec.
+    /// </summary>
+    private static string ExtractExpression(JObject obj, string propertyName = "expression")
+    {
+        var token = obj[propertyName];
+        if (token == null)
+            return string.Empty;
+
+        if (token.Type == JTokenType.Array)
+        {
+            var lines = token.ToObject<string[]>();
+            return lines != null ? string.Join("\n", lines) : string.Empty;
+        }
+
+        return token.ToString();
+    }
+
     private void ParseDataSources(JObject modelJson, TomNode parent)
     {
         var dataSources = modelJson["dataSources"] as JArray;
@@ -136,7 +155,7 @@ public class BimFileService
                 TomObjectType.SharedExpression, folder)
             {
                 JsonObject = exprObj,
-                Expression = exprObj["expression"]?.ToString() ?? string.Empty,
+                Expression = ExtractExpression(exprObj),
                 Description = exprObj["description"]?.ToString() ?? string.Empty
             };
             exprNode.BuildProperties();
@@ -203,7 +222,7 @@ public class BimFileService
             {
                 JsonObject = colObj,
                 DataType = colObj["dataType"]?.ToString() ?? string.Empty,
-                Expression = colObj["expression"]?.ToString() ?? string.Empty,
+                Expression = ExtractExpression(colObj),
                 FormatString = colObj["formatString"]?.ToString() ?? string.Empty,
                 IsHidden = colObj["isHidden"]?.Value<bool>() ?? false,
                 DisplayFolder = colObj["displayFolder"]?.ToString() ?? string.Empty,
@@ -227,28 +246,12 @@ public class BimFileService
             var measObj = meas as JObject;
             if (measObj == null) continue;
 
-            // Handle expression that might be string or array of strings
-            var expression = string.Empty;
-            var exprToken = measObj["expression"];
-            if (exprToken != null)
-            {
-                if (exprToken.Type == JTokenType.Array)
-                {
-                    var lines = exprToken.ToObject<string[]>();
-                    expression = lines != null ? string.Join("\n", lines) : string.Empty;
-                }
-                else
-                {
-                    expression = exprToken.ToString();
-                }
-            }
-
             var measNode = new TomNode(
                 measObj["name"]?.ToString() ?? "Unknown Measure",
                 TomObjectType.Measure, folder)
             {
                 JsonObject = measObj,
-                Expression = expression,
+                Expression = ExtractExpression(measObj),
                 FormatString = measObj["formatString"]?.ToString() ?? string.Empty,
                 IsHidden = measObj["isHidden"]?.Value<bool>() ?? false,
                 DisplayFolder = measObj["displayFolder"]?.ToString() ?? string.Empty,

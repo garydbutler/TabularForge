@@ -21,6 +21,12 @@ public sealed class DaxFormatter
         var lexer = new DaxLexer(daxExpression);
         var tokens = lexer.Tokenize();
 
+        // Check if this is a short expression that should stay inline
+        if (IsShortExpression(daxExpression, tokens))
+        {
+            return FormatInline(tokens);
+        }
+
         var sb = new StringBuilder();
         int indentLevel = 0;
         bool atLineStart = true;
@@ -277,4 +283,124 @@ public sealed class DaxFormatter
         }
         return false;
     }
+
+    /// <summary>
+    /// Determines if the expression is short enough to format inline (single line).
+    /// </summary>
+    private bool IsShortExpression(string daxExpression, List<DaxToken> tokens)
+    {
+        if (!_options.CompactShortExpressions)
+            return false;
+
+        // Already has newlines - format as multiline
+        if (daxExpression.Contains('\n'))
+            return false;
+
+        // Check for VAR/RETURN which should always be multiline
+        bool hasVarReturn = tokens.Any(t => t.Type == DaxTokenType.Var || t.Type == DaxTokenType.Return);
+        if (hasVarReturn)
+            return false;
+
+        // Count non-trivia tokens
+        int tokenCount = tokens.Count(t => !t.IsTrivia && t.Type != DaxTokenType.EOF);
+
+        // Calculate character count (rough estimate of formatted length)
+        int charCount = tokens
+            .Where(t => !t.IsTrivia && t.Type != DaxTokenType.EOF)
+            .Sum(t => t.Text.Length);
+
+        // Add spacing estimates (operators, commas)
+        int operatorCount = tokens.Count(t => IsOperator(t.Type));
+        int commaCount = tokens.Count(t => t.Type == DaxTokenType.Comma);
+        charCount += operatorCount * 2; // Space before and after
+        charCount += commaCount; // Space after comma
+
+        return charCount <= _options.CompactThreshold && tokenCount <= 15;
+    }
+
+    /// <summary>
+    /// Formats a short expression as a single line with proper spacing.
+    /// </summary>
+    private string FormatInline(List<DaxToken> tokens)
+    {
+        var sb = new StringBuilder();
+
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            var token = tokens[i];
+            var prev = i > 0 ? tokens[i - 1] : null;
+
+            if (token.Type == DaxTokenType.EOF) break;
+            if (token.Type == DaxTokenType.Newline) continue;
+            if (token.Type == DaxTokenType.Whitespace)
+            {
+                // Normalize to single space (skip at start or after open paren)
+                if (sb.Length > 0 && prev?.Type != DaxTokenType.OpenParen)
+                    sb.Append(' ');
+                continue;
+            }
+
+            // Handle operators with spacing
+            if (IsOperator(token.Type))
+            {
+                if (_options.SpaceAroundOperators && sb.Length > 0 && !EndsWithSpace(sb))
+                    sb.Append(' ');
+                sb.Append(token.Text);
+                if (_options.SpaceAroundOperators)
+                    sb.Append(' ');
+                continue;
+            }
+
+            // Handle commas
+            if (token.Type == DaxTokenType.Comma)
+            {
+                sb.Append(',');
+                if (_options.SpaceAfterComma)
+                    sb.Append(' ');
+                continue;
+            }
+
+            // Handle comments
+            if (token.Type == DaxTokenType.SingleLineComment || token.Type == DaxTokenType.MultiLineComment)
+            {
+                if (_options.PreserveComments)
+                {
+                    if (sb.Length > 0 && !EndsWithSpace(sb))
+                        sb.Append(' ');
+                    sb.Append(token.Text);
+                }
+                continue;
+            }
+
+            // Format keywords and functions
+            if (token.IsKeyword)
+            {
+                sb.Append(FormatKeyword(token.Text));
+            }
+            else if (token.Type == DaxTokenType.Identifier &&
+                     _options.UppercaseFunctions &&
+                     DaxFunctionCatalog.TryGetFunction(token.Text, out _))
+            {
+                sb.Append(token.Text.ToUpperInvariant());
+            }
+            else
+            {
+                sb.Append(token.Text);
+            }
+        }
+
+        return sb.ToString().Trim();
+    }
+
+    private static bool IsOperator(DaxTokenType type) =>
+        type is DaxTokenType.Equals or DaxTokenType.NotEquals or
+        DaxTokenType.LessThan or DaxTokenType.GreaterThan or
+        DaxTokenType.LessEquals or DaxTokenType.GreaterEquals or
+        DaxTokenType.Plus or DaxTokenType.Minus or
+        DaxTokenType.Star or DaxTokenType.Slash or
+        DaxTokenType.Caret or DaxTokenType.Ampersand or
+        DaxTokenType.DoubleAmpersand or DaxTokenType.DoublePipe;
+
+    private static bool EndsWithSpace(StringBuilder sb) =>
+        sb.Length > 0 && sb[sb.Length - 1] == ' ';
 }
