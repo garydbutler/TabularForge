@@ -17,6 +17,9 @@
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="12" VerticalAlignment="Center" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Check" Click="CheckButton_Click"
+                            Padding="8,3" Margin="0,0,4,0" FontSize="11"
+                            ToolTip="Check DAX syntax and semantics" />
                     <Button Content="Format" Click="FormatButton_Click"
                             Padding="8,3" Margin="0,0,4,0" FontSize="11"
                             ToolTip="Format DAX expression (Ctrl+Shift+F)" />

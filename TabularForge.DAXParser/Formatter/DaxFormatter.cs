@@ -21,6 +21,152 @@ public sealed class DaxFormatter
         var lexer = new DaxLexer(daxExpression);
         var tokens = lexer.Tokenize();
 
+        // Short expression heuristic: if the expression is a simple single-line expression
+        // (no existing newlines, under MaxLineLength), just normalize spaces and casing.
+        if (IsShortSingleLineExpression(daxExpression, tokens))
+        {
+            return FormatInline(tokens);
+        }
+
+        return FormatMultiLine(tokens);
+    }
+
+    /// <summary>
+    /// Determines if the expression is short enough to stay on a single line.
+    /// An expression is "short single-line" if:
+    /// - It has no existing newline characters
+    /// - It contains no top-level structural keywords (EVALUATE, DEFINE, VAR, RETURN)
+    /// - Its trimmed length is under MaxLineLength
+    /// </summary>
+    private bool IsShortSingleLineExpression(string expression, List<DaxToken> tokens)
+    {
+        var trimmed = expression.Trim();
+
+        // Contains newlines - treat as multi-line
+        if (trimmed.Contains('\n') || trimmed.Contains('\r'))
+            return false;
+
+        // Too long for single line
+        if (trimmed.Length > _options.MaxLineLength)
+            return false;
+
+        // Contains structural keywords that need multi-line formatting
+        foreach (var t in tokens)
+        {
+            if (t.Type is DaxTokenType.Evaluate or DaxTokenType.Define
+                or DaxTokenType.Var or DaxTokenType.Return
+                or DaxTokenType.Measure or DaxTokenType.Column)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Format as a single line: normalize whitespace, uppercase functions/keywords.
+    /// </summary>
+    private string FormatInline(List<DaxToken> tokens)
+    {
+        var sb = new StringBuilder();
+        DaxToken? prev = null;
+
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            var token = tokens[i];
+
+            switch (token.Type)
+            {
+                case DaxTokenType.EOF:
+                case DaxTokenType.Newline:
+                    break;
+
+                case DaxTokenType.Whitespace:
+                    // Normalize to single space, but don't add leading space
+                    if (sb.Length > 0 && prev != null && !prev.IsTrivia)
+                        sb.Append(' ');
+                    break;
+
+                case DaxTokenType.SingleLineComment:
+                case DaxTokenType.MultiLineComment:
+                    if (_options.PreserveComments)
+                    {
+                        if (sb.Length > 0 && prev != null && prev.Type != DaxTokenType.Whitespace)
+                            sb.Append(' ');
+                        sb.Append(token.Text);
+                    }
+                    break;
+
+                case DaxTokenType.Comma:
+                    sb.Append(',');
+                    if (_options.SpaceAfterComma)
+                        sb.Append(' ');
+                    break;
+
+                case DaxTokenType.OpenParen:
+                    sb.Append('(');
+                    break;
+
+                case DaxTokenType.CloseParen:
+                    sb.Append(')');
+                    break;
+
+                case DaxTokenType.Equals:
+                case DaxTokenType.NotEquals:
+                case DaxTokenType.LessThan:
+                case DaxTokenType.GreaterThan:
+                case DaxTokenType.LessEquals:
+                case DaxTokenType.GreaterEquals:
+                case DaxTokenType.DoubleAmpersand:
+                case DaxTokenType.DoublePipe:
+                case DaxTokenType.Plus:
+                case DaxTokenType.Minus:
+                case DaxTokenType.Star:
+                case DaxTokenType.Slash:
+                case DaxTokenType.Caret:
+                case DaxTokenType.Ampersand:
+                    if (_options.SpaceAroundOperators)
+                    {
+                        // Remove trailing space if we're about to add one
+                        if (sb.Length > 0 && sb[sb.Length - 1] != ' ')
+                            sb.Append(' ');
+                        sb.Append(token.Text);
+                        sb.Append(' ');
+                    }
+                    else
+                    {
+                        sb.Append(token.Text);
+                    }
+                    break;
+
+                case DaxTokenType.Identifier:
+                    if (_options.UppercaseFunctions && DaxFunctionCatalog.TryGetFunction(token.Text, out _))
+                        sb.Append(token.Text.ToUpperInvariant());
+                    else
+                        sb.Append(token.Text);
+                    break;
+
+                default:
+                    if (token.IsKeyword)
+                        sb.Append(FormatKeyword(token.Text));
+                    else
+                        sb.Append(token.Text);
+                    break;
+            }
+
+            if (!token.IsTrivia)
+                prev = token;
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+    /// <summary>
+    /// Full multi-line formatting with indentation and line breaks.
+    /// </summary>
+    private string FormatMultiLine(List<DaxToken> tokens)
+    {
         var sb = new StringBuilder();
         int indentLevel = 0;
         bool atLineStart = true;
@@ -49,7 +195,6 @@ public sealed class DaxFormatter
                 case DaxTokenType.Whitespace:
                     if (!atLineStart && prev?.Type != DaxTokenType.Newline)
                     {
-                        // Normalize whitespace to single space (except at line start)
                         sb.Append(' ');
                     }
                     break;
@@ -74,7 +219,7 @@ public sealed class DaxFormatter
                     {
                         sb.AppendLine();
                     }
-                    AppendIndent(sb, 0); // Top-level keywords at column 0
+                    AppendIndent(sb, 0);
                     sb.Append(FormatKeyword(token.Text));
                     atLineStart = false;
                     lastWasNewline = false;
@@ -86,7 +231,7 @@ public sealed class DaxFormatter
                     {
                         sb.AppendLine();
                     }
-                    AppendIndent(sb, 1); // Definition keywords indented once
+                    AppendIndent(sb, 1);
                     sb.Append(FormatKeyword(token.Text));
                     atLineStart = false;
                     lastWasNewline = false;
@@ -131,10 +276,10 @@ public sealed class DaxFormatter
                     indentLevel++;
                     atLineStart = false;
                     lastWasNewline = false;
-                    // Check if we should break after open paren for function calls
+                    // Only break after open paren if args would exceed max line length
                     if (_options.AlignFunctionParameters && prev != null &&
                         (prev.Type == DaxTokenType.Identifier || prev.IsKeyword) &&
-                        ShouldBreakFunctionArgs(tokens, i))
+                        ShouldBreakFunctionArgs(tokens, i, _options.MaxLineLength, indentLevel))
                     {
                         sb.AppendLine();
                         atLineStart = true;
@@ -157,7 +302,9 @@ public sealed class DaxFormatter
                     sb.Append(',');
                     atLineStart = false;
                     lastWasNewline = false;
-                    if (_options.BreakAfterComma && IsInFunctionArgs(tokens, i))
+                    // Only break after comma if the function args are long enough to warrant it
+                    if (_options.BreakAfterComma && IsInFunctionArgs(tokens, i) &&
+                        ShouldBreakAtComma(tokens, i, _options.MaxLineLength, indentLevel))
                     {
                         sb.AppendLine();
                         atLineStart = true;
@@ -203,7 +350,6 @@ public sealed class DaxFormatter
                     break;
 
                 default:
-                    // Keywords we haven't handled specifically
                     if (token.IsKeyword)
                     {
                         if (atLineStart) AppendIndent(sb, indentLevel);
@@ -234,11 +380,14 @@ public sealed class DaxFormatter
             sb.Append(_options.IndentString);
     }
 
-    private static bool ShouldBreakFunctionArgs(List<DaxToken> tokens, int openParenIndex)
+    /// <summary>
+    /// Determines whether to break function arguments across lines by measuring
+    /// the total character length of the content between the parens.
+    /// </summary>
+    private static bool ShouldBreakFunctionArgs(List<DaxToken> tokens, int openParenIndex, int maxLineLength, int indentLevel)
     {
-        // Count non-trivia tokens until matching close paren
         int depth = 0;
-        int tokenCount = 0;
+        int charLength = 0;
         for (int i = openParenIndex; i < tokens.Count; i++)
         {
             var t = tokens[i];
@@ -248,14 +397,22 @@ public sealed class DaxFormatter
                 depth--;
                 if (depth == 0) break;
             }
-            if (!t.IsTrivia) tokenCount++;
+            if (!t.IsTrivia)
+                charLength += t.Text.Length + 1; // +1 for spacing
         }
-        return tokenCount > 6; // Break if more than a few tokens in args
+
+        // Account for indentation and content before the paren
+        int estimatedLineLength = (indentLevel * 4) + charLength;
+        return estimatedLineLength > maxLineLength;
     }
 
-    private static bool IsInFunctionArgs(List<DaxToken> tokens, int commaIndex)
+    /// <summary>
+    /// Determines whether to break at this comma by checking if the enclosing
+    /// function call's arguments are long enough to need multi-line formatting.
+    /// </summary>
+    private static bool ShouldBreakAtComma(List<DaxToken> tokens, int commaIndex, int maxLineLength, int indentLevel)
     {
-        // Walk backwards to find if we're inside a function call's parentheses
+        // Find the enclosing open paren for this comma
         int depth = 0;
         for (int i = commaIndex - 1; i >= 0; i--)
         {
@@ -264,7 +421,25 @@ public sealed class DaxFormatter
             {
                 if (depth == 0)
                 {
-                    // Check if preceded by an identifier (function name)
+                    // Found the enclosing open paren - measure the full arg span
+                    return ShouldBreakFunctionArgs(tokens, i, maxLineLength, indentLevel);
+                }
+                depth--;
+            }
+        }
+        return false;
+    }
+
+    private static bool IsInFunctionArgs(List<DaxToken> tokens, int commaIndex)
+    {
+        int depth = 0;
+        for (int i = commaIndex - 1; i >= 0; i--)
+        {
+            if (tokens[i].Type == DaxTokenType.CloseParen) depth++;
+            else if (tokens[i].Type == DaxTokenType.OpenParen)
+            {
+                if (depth == 0)
+                {
                     for (int j = i - 1; j >= 0; j--)
                     {
                         if (tokens[j].IsTrivia) continue;

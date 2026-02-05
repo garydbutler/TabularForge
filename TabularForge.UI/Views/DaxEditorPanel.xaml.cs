@@ -116,7 +116,9 @@ public partial class DaxEditorPanel : UserControl
     {
         if (_completionWindow != null && e.Text.Length > 0)
         {
-            if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '_')
+            // Only request insertion for non-identifier characters
+            // This prevents dismissing the window on the character that triggered it
+            if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '_' && e.Text[0] != '[')
             {
                 _completionWindow.CompletionList.RequestInsertion(e);
             }
@@ -137,8 +139,12 @@ public partial class DaxEditorPanel : UserControl
         }
         else if (e.Text.Length == 1 && char.IsLetter(e.Text[0]))
         {
-            // Show auto-complete after typing first letter
-            ShowCompletionWindow();
+            // Show auto-complete after typing a letter
+            // If a window is already open, it will auto-filter; only create a new one if needed
+            if (_completionWindow == null)
+            {
+                ShowCompletionWindow();
+            }
         }
     }
 
@@ -146,19 +152,31 @@ public partial class DaxEditorPanel : UserControl
     {
         if (_completionProvider == null) return;
 
+        // Close any existing window first, synchronously
+        var existingWindow = _completionWindow;
+        _completionWindow = null;
+        if (existingWindow != null)
+        {
+            existingWindow.Closed -= CompletionWindow_Closed;
+            try { existingWindow.Close(); } catch { /* already closed */ }
+        }
+
         // Refresh model info from the ViewModel before showing completions
-        EnsureModelInfo();
+        try { EnsureModelInfo(); } catch { /* non-fatal */ }
 
         var offset = DaxEditor.TextArea.Caret.Offset;
         var completions = _completionProvider.GetCompletions(DaxEditor.Document, offset, out int startOffset);
 
-        if (completions.Count == 0)
-        {
-            _completionWindow?.Close();
-            return;
-        }
+        System.Diagnostics.Debug.WriteLine($"[IntelliSense] offset={offset}, startOffset={startOffset}, completions={completions.Count}");
 
-        _completionWindow = new CompletionWindow(DaxEditor.TextArea)
+        if (completions.Count == 0)
+            return;
+
+        // Ensure startOffset is valid and doesn't exceed the current caret offset
+        if (startOffset > offset)
+            startOffset = offset;
+
+        var window = new CompletionWindow(DaxEditor.TextArea)
         {
             StartOffset = startOffset,
             CloseAutomatically = true,
@@ -166,13 +184,28 @@ public partial class DaxEditorPanel : UserControl
         };
 
         // Style the CompletionWindow for dark/light theme
-        StyleCompletionWindow(_completionWindow);
+        StyleCompletionWindow(window);
 
         foreach (var item in completions)
-            _completionWindow.CompletionList.CompletionData.Add(item);
+            window.CompletionList.CompletionData.Add(item);
 
+        _completionWindow = window;
+        _completionWindow.Closed += CompletionWindow_Closed;
         _completionWindow.Show();
-        _completionWindow.Closed += (_, _) => _completionWindow = null;
+
+        // Pre-select the best match based on the prefix already typed
+        if (startOffset < offset)
+        {
+            _completionWindow.CompletionList.SelectItem(DaxEditor.Document.GetText(startOffset, offset - startOffset));
+        }
+
+        System.Diagnostics.Debug.WriteLine($"[IntelliSense] Window shown with {completions.Count} items, startOffset={startOffset}");
+    }
+
+    private void CompletionWindow_Closed(object? sender, EventArgs e)
+    {
+        if (sender == _completionWindow)
+            _completionWindow = null;
     }
 
     private void EnsureModelInfo()
@@ -523,6 +556,63 @@ public partial class DaxEditorPanel : UserControl
         }
         sb.Append(text, lastIdx, text.Length - lastIdx);
         return sb.ToString();
+    }
+
+    // === DAX Check ===
+
+    private void CheckButton_Click(object sender, RoutedEventArgs e)
+    {
+        CheckDaxSyntax();
+    }
+
+    private void CheckDaxSyntax()
+    {
+        var editorText = DaxEditor.Text;
+        if (string.IsNullOrWhiteSpace(editorText))
+        {
+            var vm1 = DataContext as MainViewModel
+                ?? (Application.Current.MainWindow?.DataContext as MainViewModel);
+            vm1?.AddMessage("Nothing to check - editor is empty.");
+            return;
+        }
+
+        var vm = DataContext as MainViewModel
+            ?? (Application.Current.MainWindow?.DataContext as MainViewModel);
+
+        try
+        {
+            // Build model info if available, otherwise use empty model
+            var modelInfo = vm?.IsModelLoaded == true
+                ? vm.BuildModelInfo()
+                : new ModelInfo();
+
+            var analyzer = new DaxSemanticAnalyzer(modelInfo);
+            var sourceName = vm?.SelectedNode?.Name ?? "DAX Editor";
+            var diagnostics = analyzer.Analyze(editorText, sourceName);
+
+            // Update the error list panel
+            if (vm != null)
+            {
+                vm.ErrorList.UpdateDiagnostics(diagnostics);
+                var errorCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Error);
+                var warnCount = diagnostics.Count(d => d.Severity == DaxDiagnosticSeverity.Warning);
+
+                if (diagnostics.Count == 0)
+                {
+                    vm.AddMessage($"Check '{sourceName}': No issues found.");
+                    vm.StatusMessage = "DAX check: No issues found";
+                }
+                else
+                {
+                    vm.AddMessage($"Check '{sourceName}': {errorCount} error(s), {warnCount} warning(s)");
+                    vm.StatusMessage = $"DAX check: {errorCount} error(s), {warnCount} warning(s)";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            vm?.AddMessage($"Check error: {ex.Message}");
+        }
     }
 
     // === DAX Formatting ===

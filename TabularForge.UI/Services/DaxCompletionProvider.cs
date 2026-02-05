@@ -21,10 +21,14 @@ public sealed class DaxCompletionProvider
         startOffset = offset;
         var completions = new List<ICompletionData>();
 
-        if (document == null || offset <= 0)
+        if (document == null || offset < 0)
             return completions;
 
         var text = document.Text;
+        if (string.IsNullOrEmpty(text) || offset > text.Length)
+            return completions;
+
+        // For offset 0, we can still show general completions (e.g. Ctrl+Space on empty doc)
         var context = AnalyzeContext(text, offset);
 
         switch (context.Type)
@@ -55,13 +59,18 @@ public sealed class DaxCompletionProvider
                 break;
         }
 
+        System.Diagnostics.Debug.WriteLine($"[DaxCompletionProvider] Context={context.Type}, Prefix='{context.Prefix}', PrefixStart={context.PrefixStart}, Results={completions.Count}");
+
         return completions;
     }
 
     private CompletionContext AnalyzeContext(string text, int offset)
     {
-        if (offset <= 0 || offset > text.Length)
+        if (offset < 0 || offset > text.Length)
             return new CompletionContext(CompletionContextType.General, string.Empty, offset);
+
+        if (offset == 0)
+            return new CompletionContext(CompletionContextType.General, string.Empty, 0);
 
         // Check if we're inside a column reference [...]
         int bracketStart = -1;
