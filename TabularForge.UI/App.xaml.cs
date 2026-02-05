@@ -34,11 +34,22 @@ public partial class App : Application
             DataContext = mainVm
         };
 
-        mainVm.AddMessage("TabularForge started.");
+        // Load persisted settings
+        var settingsService = _serviceProvider.GetRequiredService<SettingsService>();
+        var settings = settingsService.Load();
+
+        // Apply persisted theme
+        if (!settings.IsDarkTheme)
+        {
+            mainVm.IsDarkTheme = false;
+            mainVm.ApplyTheme();
+        }
+
+        mainVm.AddMessage("TabularForge v6.0 started.");
         mainVm.AddMessage($"Runtime: .NET {Environment.Version}");
-        mainVm.AddMessage("Phase 5: Automation & Analysis loaded.");
-        mainVm.AddMessage("Features: C# Script Engine, Best Practice Analyzer, Import Table Wizard.");
-        mainVm.AddMessage("Previous: Diagram View, Pivot Grid, VertiPaq, Server, DAX Query, Deployment.");
+        mainVm.AddMessage("Phase 6: Polish & Final loaded.");
+        mainVm.AddMessage("New: Translation Editor, Perspective Editor, Keyboard Shortcuts, Layout Persistence.");
+        mainVm.AddMessage("Previous: C# Script, BPA, Import, Diagram, Pivot, VertiPaq, Server, DAX.");
         mainVm.AddMessage("Ready. Open a .bim file or connect to a server to begin.");
 
         mainWindow.Show();
@@ -70,6 +81,11 @@ public partial class App : Application
         services.AddSingleton<ScriptingService>();
         services.AddSingleton<BpaService>();
         services.AddSingleton<ImportService>();
+
+        // Phase 6: Polish services
+        services.AddSingleton<TranslationService>();
+        services.AddSingleton<PerspectiveService>();
+        services.AddSingleton<SettingsService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
@@ -113,9 +129,30 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        // Dispose connection service to clean up server connections
         if (_serviceProvider != null)
         {
+            // Save window state and settings
+            var settingsService = _serviceProvider.GetService<SettingsService>();
+            var mainVm = _serviceProvider.GetService<MainViewModel>();
+            if (settingsService != null && mainVm != null)
+            {
+                settingsService.Settings.IsDarkTheme = mainVm.IsDarkTheme;
+                var mainWindow = Current.MainWindow;
+                if (mainWindow != null)
+                {
+                    settingsService.Settings.IsMaximized = mainWindow.WindowState == System.Windows.WindowState.Maximized;
+                    if (mainWindow.WindowState != System.Windows.WindowState.Maximized)
+                    {
+                        settingsService.Settings.WindowLeft = mainWindow.Left;
+                        settingsService.Settings.WindowTop = mainWindow.Top;
+                        settingsService.Settings.WindowWidth = mainWindow.Width;
+                        settingsService.Settings.WindowHeight = mainWindow.Height;
+                    }
+                }
+                settingsService.Save();
+            }
+
+            // Dispose connection service to clean up server connections
             var connectionService = _serviceProvider.GetService<ConnectionService>();
             connectionService?.Dispose();
         }

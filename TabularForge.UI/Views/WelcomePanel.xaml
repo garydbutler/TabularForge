@@ -6,14 +6,11 @@
              mc:Ignorable="d"
              Background="{DynamicResource EditorBackground}">
 
-    <Grid>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                    MaxWidth="500">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top"
+                    MaxWidth="600" Margin="0,40,0,40">
 
             <!-- Logo / Title -->
-            <TextBlock Text="⚒" FontSize="64" HorizontalAlignment="Center"
-                       Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,16" />
-
             <TextBlock Text="TabularForge" FontSize="36" FontWeight="Light"
                        HorizontalAlignment="Center"
                        Foreground="{DynamicResource PrimaryText}" />
@@ -26,7 +23,8 @@
             <!-- Quick Actions -->
             <Border Background="{DynamicResource PanelBackground}"
                     CornerRadius="8" Padding="24,16"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="Get Started" FontSize="16" FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryText}"
@@ -35,11 +33,13 @@
                     <Button Command="{Binding OpenFileCommand}" HorizontalAlignment="Left"
                             Padding="12,8" Margin="0,4">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📂" FontSize="16" Margin="0,0,8,0" />
+                            <TextBlock Text="Open" FontSize="14" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       Margin="0,0,8,0" VerticalAlignment="Center" Width="40" />
                             <StackPanel>
                                 <TextBlock Text="Open .bim File" FontSize="13"
                                            Foreground="{DynamicResource AccentBrush}" />
-                                <TextBlock Text="Load a Tabular Model Definition file"
+                                <TextBlock Text="Load a Tabular Model Definition file (Ctrl+O)"
                                            FontSize="10.5"
                                            Foreground="{DynamicResource SecondaryText}" />
                             </StackPanel>
@@ -49,38 +49,150 @@
                     <Button Command="{Binding NewModelCommand}" HorizontalAlignment="Left"
                             Padding="12,8" Margin="0,4">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📄" FontSize="16" Margin="0,0,8,0" />
+                            <TextBlock Text="New" FontSize="14" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       Margin="0,0,8,0" VerticalAlignment="Center" Width="40" />
                             <StackPanel>
                                 <TextBlock Text="New Model" FontSize="13"
                                            Foreground="{DynamicResource AccentBrush}" />
-                                <TextBlock Text="Create a new Tabular Model from scratch"
+                                <TextBlock Text="Create a new Tabular Model from scratch (Ctrl+N)"
                                            FontSize="10.5"
                                            Foreground="{DynamicResource SecondaryText}" />
                             </StackPanel>
                         </StackPanel>
                     </Button>
 
-                    <Button IsEnabled="False" HorizontalAlignment="Left"
+                    <Button Command="{Binding ConnectToServerCommand}" HorizontalAlignment="Left"
                             Padding="12,8" Margin="0,4">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔌" FontSize="16" Margin="0,0,8,0" />
+                            <TextBlock Text="Svr" FontSize="14" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       Margin="0,0,8,0" VerticalAlignment="Center" Width="40" />
                             <StackPanel>
                                 <TextBlock Text="Connect to Server" FontSize="13"
-                                           Foreground="{DynamicResource DisabledText}" />
-                                <TextBlock Text="Connect to SSAS, Azure AS, or Power BI Premium (Phase 3)"
+                                           Foreground="{DynamicResource AccentBrush}" />
+                                <TextBlock Text="Connect to SSAS, Azure AS, or Power BI Premium"
                                            FontSize="10.5"
-                                           Foreground="{DynamicResource DisabledText}" />
+                                           Foreground="{DynamicResource SecondaryText}" />
                             </StackPanel>
                         </StackPanel>
                     </Button>
                 </StackPanel>
             </Border>
 
+            <!-- Feature Overview -->
+            <Border Background="{DynamicResource PanelBackground}"
+                    CornerRadius="8" Padding="24,16"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Features" FontSize="16" FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryText}"
+                               Margin="0,0,0,12" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="TOM Explorer" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="DAX Editor + IntelliSense" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Server Connection" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="DAX Query Editor" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Diagram View" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Pivot Grid" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="VertiPaq Analyzer" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="C# Script Engine" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Best Practice Analyzer" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="Import Table Wizard" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Translation Editor" FontSize="12"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="0,2" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="Perspective Editor" FontSize="12"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="0,2" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Keyboard Shortcuts -->
+            <Border Background="{DynamicResource PanelBackground}"
+                    CornerRadius="8" Padding="24,16"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="Keyboard Shortcuts" FontSize="16" FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryText}"
+                               Margin="0,0,0,12" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Ctrl+O" FontFamily="Consolas"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="12" Margin="0,2" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Open File" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Ctrl+S" FontFamily="Consolas"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="12" Margin="0,2" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Save" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="F5" FontFamily="Consolas"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="12" Margin="0,2" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Apply DAX Expression" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Ctrl+Z / Y" FontFamily="Consolas"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="12" Margin="0,2" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="Undo / Redo" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Ctrl+Shift+D" FontFamily="Consolas"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="12" Margin="0,2" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="DAX Script Editor" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Ctrl+I" FontFamily="Consolas"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="12" Margin="0,2" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="Toggle Hidden" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryText}" Margin="0,2" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Version -->
-            <TextBlock Text="Phase 1 - Foundation MVP | .NET 8 | WPF"
+            <TextBlock Text="TabularForge v6.0 | .NET 8 | WPF | Phase 6: Polish"
                        FontSize="10.5" HorizontalAlignment="Center"
                        Foreground="{DynamicResource SecondaryText}"
                        Margin="0,16,0,0" />
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

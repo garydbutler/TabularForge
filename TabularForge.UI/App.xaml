@@ -40,6 +40,12 @@
             <conv:StepNumberConverter x:Key="StepNumberConverter" />
             <conv:ScriptDiagSeverityToColorConverter x:Key="ScriptDiagToColor" />
             <conv:SourceTypeToVisibilityConverter x:Key="SourceTypeToVis" />
+
+            <!-- Phase 6 Converters -->
+            <conv:ConflictToColorConverter x:Key="ConflictToColor" />
+            <conv:CustomizedToFontWeightConverter x:Key="CustomizedToFontWeight" />
+            <conv:ModifiedToBackgroundConverter x:Key="ModifiedToBackground" />
+            <conv:BuiltInToIconConverter x:Key="BuiltInToIcon" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

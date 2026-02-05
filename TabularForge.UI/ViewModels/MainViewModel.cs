@@ -173,7 +173,10 @@ public partial class MainViewModel : ObservableObject
         VertiPaqService vertiPaqService,
         ScriptingService scriptingService,
         BpaService bpaService,
-        ImportService importService)
+        ImportService importService,
+        TranslationService translationService,
+        PerspectiveService perspectiveService,
+        SettingsService settingsService)
     {
         _bimFileService = bimFileService;
         _undoRedoManager = undoRedoManager;
@@ -186,6 +189,9 @@ public partial class MainViewModel : ObservableObject
         _scriptingService = scriptingService;
         _bpaService = bpaService;
         _importService = importService;
+        _translationService = translationService;
+        _perspectiveService = perspectiveService;
+        _settingsService = settingsService;
 
         // Initialize Phase 3 sub-ViewModels
         DaxQuery = new DaxQueryViewModel(queryService, connectionService);
@@ -201,6 +207,10 @@ public partial class MainViewModel : ObservableObject
         ScriptEditor = new ScriptEditorViewModel(scriptingService, connectionService);
         Bpa = new BpaViewModel(bpaService);
 
+        // Initialize Phase 6 sub-ViewModels
+        TranslationEditor = new TranslationEditorViewModel(translationService);
+        PerspectiveEditor = new PerspectiveEditorViewModel(perspectiveService);
+
         // Wire message logging from sub-VMs
         DaxQuery.MessageLogged += (_, msg) => AddMessage(msg);
         TablePreview.MessageLogged += (_, msg) => AddMessage(msg);
@@ -210,6 +220,8 @@ public partial class MainViewModel : ObservableObject
         VertiPaq.MessageLogged += (_, msg) => AddMessage(msg);
         ScriptEditor.MessageLogged += (_, msg) => AddMessage(msg);
         Bpa.MessageLogged += (_, msg) => AddMessage(msg);
+        TranslationEditor.MessageLogged += (_, msg) => AddMessage(msg);
+        PerspectiveEditor.MessageLogged += (_, msg) => AddMessage(msg);
 
         // BPA navigation: jump to object in TOM explorer
         Bpa.NavigateToObject += (_, node) => SelectedNode = node;
@@ -312,6 +324,16 @@ public partial class MainViewModel : ObservableObject
                 Bpa.ModelRoot = root;
                 Bpa.IsModelLoaded = true;
             }
+
+            // Update Phase 6 panels with model data
+            if (TranslationEditor != null)
+                TranslationEditor.ModelRoot = root;
+            if (PerspectiveEditor != null)
+                PerspectiveEditor.ModelRoot = root;
+
+            // Track recent files
+            _settingsService.AddRecentFile(filePath);
+            _settingsService.Save();
 
             // Auto-select the model root
             SelectedNode = root;
@@ -1079,6 +1101,137 @@ public partial class MainViewModel : ObservableObject
     }
 
     // ===========================
+    //  PHASE 6: TRANSLATION EDITOR
+    // ===========================
+
+    [RelayCommand]
+    private void OpenTranslationEditor()
+    {
+        if (ModelRoot == null)
+        {
+            AddMessage("No model loaded. Open a .bim file first.");
+            return;
+        }
+
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "translation_editor");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "Translations",
+            ContentId = "translation_editor",
+            TabType = DocumentTabType.TranslationEditor,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+
+        if (TranslationEditor != null)
+        {
+            TranslationEditor.ModelRoot = ModelRoot;
+            TranslationEditor.LoadTranslationsCommand.Execute(null);
+        }
+        AddMessage("Translation Editor opened.");
+    }
+
+    // ===========================
+    //  PHASE 6: PERSPECTIVE EDITOR
+    // ===========================
+
+    [RelayCommand]
+    private void OpenPerspectiveEditor()
+    {
+        if (ModelRoot == null)
+        {
+            AddMessage("No model loaded. Open a .bim file first.");
+            return;
+        }
+
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "perspective_editor");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "Perspectives",
+            ContentId = "perspective_editor",
+            TabType = DocumentTabType.PerspectiveEditor,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+
+        if (PerspectiveEditor != null)
+        {
+            PerspectiveEditor.ModelRoot = ModelRoot;
+            PerspectiveEditor.LoadPerspectivesCommand.Execute(null);
+        }
+        AddMessage("Perspective Editor opened.");
+    }
+
+    // ===========================
+    //  PHASE 6: KEYBOARD SHORTCUTS
+    // ===========================
+
+    [RelayCommand]
+    private void OpenKeyboardShortcuts()
+    {
+        var vm = new KeyboardShortcutsViewModel(_settingsService);
+        var dialog = new KeyboardShortcutsDialog
+        {
+            DataContext = vm,
+            Owner = Application.Current.MainWindow
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            AddMessage("Keyboard shortcuts updated.");
+            StatusMessage = "Keyboard shortcuts saved";
+        }
+    }
+
+    // ===========================
+    //  PHASE 6: SHORTCUT REFERENCE
+    // ===========================
+
+    [RelayCommand]
+    private void ShowShortcutReference()
+    {
+        var shortcuts = _settingsService.GetDefaultShortcuts();
+        var customized = _settingsService.Settings.CustomShortcuts;
+        foreach (var s in shortcuts)
+        {
+            var custom = customized.FirstOrDefault(c => c.CommandId == s.CommandId);
+            if (custom != null)
+                s.CustomKeyGesture = custom.CustomKeyGesture;
+        }
+
+        var dialog = new ShortcutReferenceDialog(shortcuts)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        dialog.ShowDialog();
+    }
+
+    // ===========================
+    //  PHASE 6: LAYOUT MANAGER
+    // ===========================
+
+    [RelayCommand]
+    private void OpenLayoutManager()
+    {
+        // This opens the dialog - actual layout load/save is handled in MainWindow.xaml.cs
+        AddMessage("Layout Manager opened.");
+    }
+
+    // ===========================
     //  ABOUT
     // ===========================
 
@@ -1086,15 +1239,18 @@ public partial class MainViewModel : ObservableObject
     private void ShowAbout()
     {
         MessageBox.Show(
-            "TabularForge v5.0.0\n\n" +
+            "TabularForge v6.0.0\n\n" +
             "A Tabular Model Editor for Power BI and Analysis Services\n\n" +
             "Built with .NET 8, WPF, AvalonDock, AvalonEdit, and Roslyn\n\n" +
-            "Phase 5: Automation & Analysis\n" +
-            "- C# Script Engine (Roslyn)\n" +
-            "- Best Practice Analyzer (BPA)\n" +
-            "- Import Table Wizard\n\n" +
-            "Previous: Diagram View, Pivot Grid, VertiPaq Analyzer,\n" +
-            "Server Connection, DAX Query, Deployment Wizard",
+            "Features:\n" +
+            "- TOM Explorer with full model tree\n" +
+            "- DAX Editor with IntelliSense, formatting, scripting\n" +
+            "- Server connection, DAX query, deployment\n" +
+            "- Diagram view, pivot grid, VertiPaq analyzer\n" +
+            "- C# scripting (Roslyn), BPA, import wizard\n" +
+            "- Translation editor, perspective editor\n" +
+            "- Keyboard shortcuts, layout persistence\n\n" +
+            "github.com/tabularforge",
             "About TabularForge",
             MessageBoxButton.OK,
             MessageBoxImage.Information);

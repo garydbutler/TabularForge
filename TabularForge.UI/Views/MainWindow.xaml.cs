@@ -1,7 +1,9 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 using AvalonDock;
 using AvalonDock.Layout;
+using AvalonDock.Layout.Serialization;
 using TabularForge.Core.Services;
 using TabularForge.UI.ViewModels;
 
@@ -30,6 +32,9 @@ public partial class MainWindow : Window
                 var connectionService = GetConnectionService();
                 connectionService?.SetParentWindow(handle);
             }
+
+            // Restore window position from settings
+            RestoreWindowPosition();
         };
     }
 
@@ -88,6 +93,8 @@ public partial class MainWindow : Window
             DocumentTabType.VertiPaq => CreateVertiPaqPanel(),
             DocumentTabType.CSharpScript => CreateCSharpScriptPanel(),
             DocumentTabType.BestPracticeAnalyzer => CreateBpaPanel(),
+            DocumentTabType.TranslationEditor => CreateTranslationEditorPanel(),
+            DocumentTabType.PerspectiveEditor => CreatePerspectiveEditorPanel(),
             _ => new WelcomePanel()
         };
     }
@@ -148,6 +155,96 @@ public partial class MainWindow : Window
         return panel;
     }
 
+    private TranslationEditorPanel CreateTranslationEditorPanel()
+    {
+        var panel = new TranslationEditorPanel();
+        panel.DataContext = _viewModel?.TranslationEditor;
+        return panel;
+    }
+
+    private PerspectiveEditorPanel CreatePerspectiveEditorPanel()
+    {
+        var panel = new PerspectiveEditorPanel();
+        panel.DataContext = _viewModel?.PerspectiveEditor;
+        return panel;
+    }
+
+    // ===========================
+    //  LAYOUT PERSISTENCE
+    // ===========================
+
+    /// <summary>
+    /// Saves the current AvalonDock layout to XML string.
+    /// </summary>
+    public string SerializeLayout()
+    {
+        try
+        {
+            var serializer = new XmlLayoutSerializer(DockManager);
+            using var writer = new StringWriter();
+            serializer.Serialize(writer);
+            return writer.ToString();
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Restores an AvalonDock layout from XML string.
+    /// </summary>
+    public void DeserializeLayout(string layoutXml)
+    {
+        if (string.IsNullOrEmpty(layoutXml)) return;
+
+        try
+        {
+            var serializer = new XmlLayoutSerializer(DockManager);
+            serializer.LayoutSerializationCallback += (_, args) =>
+            {
+                // Skip deserialization of document content - those are dynamic
+                if (args.Model is LayoutDocument)
+                {
+                    args.Cancel = true;
+                }
+            };
+            using var reader = new StringReader(layoutXml);
+            serializer.Deserialize(reader);
+        }
+        catch
+        {
+            // If layout restore fails, keep the default layout
+        }
+    }
+
+    private void RestoreWindowPosition()
+    {
+        if (_viewModel == null) return;
+
+        var settings = _viewModel.SettingsService.Settings;
+        if (settings.IsMaximized)
+        {
+            WindowState = WindowState.Maximized;
+        }
+        else if (settings.WindowWidth > 0 && settings.WindowHeight > 0)
+        {
+            WindowState = WindowState.Normal;
+            Left = settings.WindowLeft;
+            Top = settings.WindowTop;
+            Width = settings.WindowWidth;
+            Height = settings.WindowHeight;
+        }
+
+        // Restore saved layout if available
+        var layoutXml = _viewModel.SettingsService.LoadLayoutPreset(
+            settings.ActiveLayoutPreset);
+        if (!string.IsNullOrEmpty(layoutXml))
+        {
+            DeserializeLayout(layoutXml);
+        }
+    }
+
     private void DockManager_ActiveContentChanged(object? sender, EventArgs e)
     {
         // Keep view model in sync with AvalonDock's active document
@@ -160,6 +257,18 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
+        // Save current layout before closing
+        if (_viewModel != null)
+        {
+            var layoutXml = SerializeLayout();
+            if (!string.IsNullOrEmpty(layoutXml))
+            {
+                var settings = _viewModel.SettingsService;
+                settings.SaveLayoutPreset(
+                    _viewModel.SettingsService.Settings.ActiveLayoutPreset, layoutXml);
+            }
+        }
+
         base.OnClosing(e);
     }
 }

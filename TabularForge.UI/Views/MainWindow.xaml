@@ -87,7 +87,11 @@
                 <MenuItem Header="C# _Script Editor" Command="{Binding OpenCSharpScriptCommand}" />
                 <MenuItem Header="_Best Practice Analyzer" Command="{Binding OpenBpaCommand}" />
                 <Separator />
+                <MenuItem Header="_Translation Editor" Command="{Binding OpenTranslationEditorCommand}" />
+                <MenuItem Header="P_erspective Editor" Command="{Binding OpenPerspectiveEditorCommand}" />
+                <Separator />
                 <MenuItem Header="_Toggle Theme" Command="{Binding ToggleThemeCommand}" />
+                <MenuItem Header="_Window Layouts..." Command="{Binding OpenLayoutManagerCommand}" />
             </MenuItem>
 
             <!-- Model Menu -->
@@ -110,14 +114,18 @@
                 <MenuItem Header="C# _Script Editor" Command="{Binding OpenCSharpScriptCommand}" />
                 <MenuItem Header="_Best Practice Analyzer" Command="{Binding OpenBpaCommand}" />
                 <Separator />
+                <MenuItem Header="_Translation Editor" Command="{Binding OpenTranslationEditorCommand}" />
+                <MenuItem Header="P_erspective Editor" Command="{Binding OpenPerspectiveEditorCommand}" />
+                <Separator />
                 <MenuItem Header="_Import Table..." Command="{Binding OpenImportWizardCommand}" />
                 <Separator />
-                <MenuItem Header="_Preferences..." IsEnabled="False" />
-                <MenuItem Header="Keyboard _Shortcuts..." IsEnabled="False" />
+                <MenuItem Header="Keyboard _Shortcuts..." Command="{Binding OpenKeyboardShortcutsCommand}" />
             </MenuItem>
 
             <!-- Help Menu -->
             <MenuItem Header="_Help">
+                <MenuItem Header="_Keyboard Shortcut Reference" Command="{Binding ShowShortcutReferenceCommand}" />
+                <Separator />
                 <MenuItem Header="_About TabularForge" Command="{Binding ShowAboutCommand}" />
             </MenuItem>
         </Menu>
