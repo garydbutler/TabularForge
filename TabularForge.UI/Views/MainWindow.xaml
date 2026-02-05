@@ -84,6 +84,9 @@
                 <MenuItem Header="_Pivot Grid" Command="{Binding OpenPivotGridCommand}" />
                 <MenuItem Header="Verti_Paq Analyzer" Command="{Binding OpenVertiPaqCommand}" />
                 <Separator />
+                <MenuItem Header="C# _Script Editor" Command="{Binding OpenCSharpScriptCommand}" />
+                <MenuItem Header="_Best Practice Analyzer" Command="{Binding OpenBpaCommand}" />
+                <Separator />
                 <MenuItem Header="_Toggle Theme" Command="{Binding ToggleThemeCommand}" />
             </MenuItem>
 
@@ -94,6 +97,7 @@
                 <Separator />
                 <MenuItem Header="_Refresh..." Command="{Binding OpenDataRefreshCommand}" />
                 <MenuItem Header="_Deploy..." Command="{Binding OpenDeploymentWizardCommand}" />
+                <MenuItem Header="_Import Table..." Command="{Binding OpenImportWizardCommand}" />
                 <Separator />
                 <MenuItem Header="Toggle _Hidden" Command="{Binding ToggleHiddenCommand}"
                           InputGestureText="Ctrl+I" />
@@ -103,6 +107,11 @@
 
             <!-- Tools Menu -->
             <MenuItem Header="_Tools">
+                <MenuItem Header="C# _Script Editor" Command="{Binding OpenCSharpScriptCommand}" />
+                <MenuItem Header="_Best Practice Analyzer" Command="{Binding OpenBpaCommand}" />
+                <Separator />
+                <MenuItem Header="_Import Table..." Command="{Binding OpenImportWizardCommand}" />
+                <Separator />
                 <MenuItem Header="_Preferences..." IsEnabled="False" />
                 <MenuItem Header="Keyboard _Shortcuts..." IsEnabled="False" />
             </MenuItem>
@@ -193,6 +202,22 @@
                 <Button Command="{Binding OpenVertiPaqCommand}" ToolTip="VertiPaq Analyzer"
                         Padding="6,4" Margin="1,0">
                     <TextBlock Text="VertiPaq" FontSize="12" />
+                </Button>
+
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
+                        Margin="6,2" />
+
+                <Button Command="{Binding OpenCSharpScriptCommand}" ToolTip="C# Script Editor"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="C# Script" FontSize="12" />
+                </Button>
+                <Button Command="{Binding OpenBpaCommand}" ToolTip="Best Practice Analyzer"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="BPA" FontSize="12" />
+                </Button>
+                <Button Command="{Binding OpenImportWizardCommand}" ToolTip="Import Table"
+                        Padding="6,4" Margin="1,0">
+                    <TextBlock Text="Import" FontSize="12" />
                 </Button>
 
                 <Border Width="1" Background="{DynamicResource SeparatorBrush}"

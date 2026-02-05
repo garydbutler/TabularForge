@@ -67,6 +67,8 @@ public partial class MainWindow : Window
             DocumentTabType.Diagram => CreateDiagramPanel(),
             DocumentTabType.PivotGrid => CreatePivotGridPanel(),
             DocumentTabType.VertiPaq => CreateVertiPaqPanel(),
+            DocumentTabType.CSharpScript => CreateCSharpScriptPanel(),
+            DocumentTabType.BestPracticeAnalyzer => CreateBpaPanel(),
             _ => new WelcomePanel()
         };
     }
@@ -110,6 +112,20 @@ public partial class MainWindow : Window
     {
         var panel = new VertiPaqPanel();
         panel.DataContext = _viewModel?.VertiPaq;
+        return panel;
+    }
+
+    private CSharpScriptPanel CreateCSharpScriptPanel()
+    {
+        var panel = new CSharpScriptPanel();
+        panel.DataContext = _viewModel?.ScriptEditor;
+        return panel;
+    }
+
+    private BpaPanel CreateBpaPanel()
+    {
+        var panel = new BpaPanel();
+        panel.DataContext = _viewModel?.Bpa;
         return panel;
     }
 

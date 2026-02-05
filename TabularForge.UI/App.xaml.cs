@@ -36,9 +36,9 @@ public partial class App : Application
 
         mainVm.AddMessage("TabularForge started.");
         mainVm.AddMessage($"Runtime: .NET {Environment.Version}");
-        mainVm.AddMessage("Phase 4: Visual Tools loaded.");
-        mainVm.AddMessage("Features: Diagram View, Pivot Grid, VertiPaq Analyzer.");
-        mainVm.AddMessage("Previous: Server Connection, DAX Query, Table Preview, Data Refresh, Deployment.");
+        mainVm.AddMessage("Phase 5: Automation & Analysis loaded.");
+        mainVm.AddMessage("Features: C# Script Engine, Best Practice Analyzer, Import Table Wizard.");
+        mainVm.AddMessage("Previous: Diagram View, Pivot Grid, VertiPaq, Server, DAX Query, Deployment.");
         mainVm.AddMessage("Ready. Open a .bim file or connect to a server to begin.");
 
         mainWindow.Show();
@@ -65,6 +65,11 @@ public partial class App : Application
         // Phase 4: Visual Tools services
         services.AddSingleton<DiagramService>();
         services.AddSingleton<VertiPaqService>();
+
+        // Phase 5: Automation & Analysis services
+        services.AddSingleton<ScriptingService>();
+        services.AddSingleton<BpaService>();
+        services.AddSingleton<ImportService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();

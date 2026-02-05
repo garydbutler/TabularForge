@@ -32,6 +32,14 @@
             <conv:SeverityToIconConverter x:Key="SeverityToIcon" />
             <conv:StringToBrushConverter x:Key="StringToBrush" />
             <conv:BoolToLineStyleConverter x:Key="BoolToLineStyle" />
+
+            <!-- Phase 5 Converters -->
+            <conv:BpaSeverityToColorConverter x:Key="BpaSevToColor" />
+            <conv:BpaSeverityToIconConverter x:Key="BpaSevToIcon" />
+            <conv:ExecutionStateToColorConverter x:Key="ExecStateToColor" />
+            <conv:StepNumberConverter x:Key="StepNumberConverter" />
+            <conv:ScriptDiagSeverityToColorConverter x:Key="ScriptDiagToColor" />
+            <conv:SourceTypeToVisibilityConverter x:Key="SourceTypeToVis" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

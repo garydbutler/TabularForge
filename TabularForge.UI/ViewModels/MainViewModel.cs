@@ -25,6 +25,9 @@ public partial class MainViewModel : ObservableObject
     private readonly DeploymentService _deploymentService;
     private readonly DiagramService _diagramService;
     private readonly VertiPaqService _vertiPaqService;
+    private readonly ScriptingService _scriptingService;
+    private readonly BpaService _bpaService;
+    private readonly ImportService _importService;
     private string? _currentFilePath;
 
     // === Model State ===
@@ -128,6 +131,14 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private VertiPaqViewModel? _vertiPaq;
 
+    // === Phase 5: Automation & Analysis ViewModels ===
+
+    [ObservableProperty]
+    private ScriptEditorViewModel? _scriptEditor;
+
+    [ObservableProperty]
+    private BpaViewModel? _bpa;
+
     // === Undo/Redo ===
 
     public UndoRedoManager UndoRedo => _undoRedoManager;
@@ -145,7 +156,10 @@ public partial class MainViewModel : ObservableObject
         RefreshService refreshService,
         DeploymentService deploymentService,
         DiagramService diagramService,
-        VertiPaqService vertiPaqService)
+        VertiPaqService vertiPaqService,
+        ScriptingService scriptingService,
+        BpaService bpaService,
+        ImportService importService)
     {
         _bimFileService = bimFileService;
         _undoRedoManager = undoRedoManager;
@@ -155,6 +169,9 @@ public partial class MainViewModel : ObservableObject
         _deploymentService = deploymentService;
         _diagramService = diagramService;
         _vertiPaqService = vertiPaqService;
+        _scriptingService = scriptingService;
+        _bpaService = bpaService;
+        _importService = importService;
 
         // Initialize Phase 3 sub-ViewModels
         DaxQuery = new DaxQueryViewModel(queryService, connectionService);
@@ -166,6 +183,10 @@ public partial class MainViewModel : ObservableObject
         PivotGrid = new PivotGridViewModel(queryService, connectionService);
         VertiPaq = new VertiPaqViewModel(vertiPaqService, connectionService);
 
+        // Initialize Phase 5 sub-ViewModels
+        ScriptEditor = new ScriptEditorViewModel(scriptingService, connectionService);
+        Bpa = new BpaViewModel(bpaService);
+
         // Wire message logging from sub-VMs
         DaxQuery.MessageLogged += (_, msg) => AddMessage(msg);
         TablePreview.MessageLogged += (_, msg) => AddMessage(msg);
@@ -173,6 +194,11 @@ public partial class MainViewModel : ObservableObject
         Diagram.MessageLogged += (_, msg) => AddMessage(msg);
         PivotGrid.MessageLogged += (_, msg) => AddMessage(msg);
         VertiPaq.MessageLogged += (_, msg) => AddMessage(msg);
+        ScriptEditor.MessageLogged += (_, msg) => AddMessage(msg);
+        Bpa.MessageLogged += (_, msg) => AddMessage(msg);
+
+        // BPA navigation: jump to object in TOM explorer
+        Bpa.NavigateToObject += (_, node) => SelectedNode = node;
 
         // Track connection state changes
         _connectionService.ConnectionStateChanged += (_, connected) =>
@@ -261,6 +287,17 @@ public partial class MainViewModel : ObservableObject
             // Update Phase 4 panels with model data
             Diagram?.LoadFromModel(root);
             PivotGrid?.LoadFieldsFromModel(root);
+
+            // Update Phase 5 panels with model data
+            if (ScriptEditor != null)
+            {
+                ScriptEditor.ModelRoot = root;
+            }
+            if (Bpa != null)
+            {
+                Bpa.ModelRoot = root;
+                Bpa.IsModelLoaded = true;
+            }
 
             // Auto-select the model root
             SelectedNode = root;
@@ -358,6 +395,10 @@ public partial class MainViewModel : ObservableObject
         PropertiesHeader = $"Properties - {value.Name}";
         value.BuildProperties();
         SelectedProperties = new ObservableCollection<TomProperty>(value.Properties);
+
+        // Update Phase 5 script editor with selected node
+        if (ScriptEditor != null)
+            ScriptEditor.SelectedNode = value;
 
         // If it's a measure or calculated column, show expression in DAX editor
         if (value.ObjectType is TomObjectType.Measure or TomObjectType.CalculatedColumn
@@ -841,6 +882,109 @@ public partial class MainViewModel : ObservableObject
     }
 
     // ===========================
+    //  PHASE 5: C# SCRIPT EDITOR
+    // ===========================
+
+    [RelayCommand]
+    private void OpenCSharpScript()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "csharp_script");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "C# Script",
+            ContentId = "csharp_script",
+            TabType = DocumentTabType.CSharpScript,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+
+        // Sync model to script editor
+        if (ScriptEditor != null)
+        {
+            ScriptEditor.ModelRoot = ModelRoot;
+            ScriptEditor.SelectedNode = SelectedNode;
+        }
+        AddMessage("C# Script Editor opened.");
+    }
+
+    // ===========================
+    //  PHASE 5: BEST PRACTICE ANALYZER
+    // ===========================
+
+    [RelayCommand]
+    private void OpenBpa()
+    {
+        var existingTab = DocumentTabs.FirstOrDefault(t => t.ContentId == "bpa_panel");
+        if (existingTab != null)
+        {
+            ActiveDocument = existingTab;
+            return;
+        }
+
+        var tab = new DocumentTabViewModel
+        {
+            Title = "Best Practices",
+            ContentId = "bpa_panel",
+            TabType = DocumentTabType.BestPracticeAnalyzer,
+            Content = string.Empty
+        };
+        DocumentTabs.Add(tab);
+        ActiveDocument = tab;
+
+        // Sync model
+        if (Bpa != null)
+        {
+            Bpa.ModelRoot = ModelRoot;
+            Bpa.IsModelLoaded = IsModelLoaded;
+        }
+        AddMessage("Best Practice Analyzer opened.");
+    }
+
+    // ===========================
+    //  PHASE 5: IMPORT TABLE WIZARD
+    // ===========================
+
+    [RelayCommand]
+    private void OpenImportWizard()
+    {
+        if (ModelRoot == null)
+        {
+            AddMessage("No model loaded. Open a .bim file first.");
+            MessageBox.Show("No model is loaded. Please open a .bim file first.",
+                "Import Table", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var wizardVm = new ImportWizardViewModel(_importService, _connectionService);
+        wizardVm.ModelRoot = ModelRoot;
+        wizardVm.MessageLogged += (_, msg) => AddMessage(msg);
+        wizardVm.ImportCompleted += (_, _) =>
+        {
+            if (wizardVm.ImportSucceeded && ModelRoot != null)
+            {
+                var count = BimFileService.CountObjects(ModelRoot);
+                ObjectCount = $"{count} objects";
+                OnPropertyChanged(nameof(ModelRoot));
+            }
+        };
+
+        var dialog = new ImportWizardDialog
+        {
+            DataContext = wizardVm,
+            Owner = Application.Current.MainWindow
+        };
+
+        dialog.ShowDialog();
+    }
+
+    // ===========================
     //  MODEL INFO (Phase 2)
     // ===========================
 
@@ -928,15 +1072,15 @@ public partial class MainViewModel : ObservableObject
     private void ShowAbout()
     {
         MessageBox.Show(
-            "TabularForge v4.0.0\n\n" +
+            "TabularForge v5.0.0\n\n" +
             "A Tabular Model Editor for Power BI and Analysis Services\n\n" +
-            "Built with .NET 8, WPF, AvalonDock, and AvalonEdit\n\n" +
-            "Phase 4: Visual Tools\n" +
-            "- Diagram View (Relationship Editor)\n" +
-            "- Pivot Grid\n" +
-            "- VertiPaq Analyzer\n\n" +
-            "Previous: Server Connection, DAX Query, Table Preview,\n" +
-            "Data Refresh, Deployment Wizard",
+            "Built with .NET 8, WPF, AvalonDock, AvalonEdit, and Roslyn\n\n" +
+            "Phase 5: Automation & Analysis\n" +
+            "- C# Script Engine (Roslyn)\n" +
+            "- Best Practice Analyzer (BPA)\n" +
+            "- Import Table Wizard\n\n" +
+            "Previous: Diagram View, Pivot Grid, VertiPaq Analyzer,\n" +
+            "Server Connection, DAX Query, Deployment Wizard",
             "About TabularForge",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
@@ -957,6 +1101,8 @@ public enum DocumentTabType
     DataRefresh,
     PivotGrid,
     VertiPaq,
+    CSharpScript,
+    BestPracticeAnalyzer,
     Welcome
 }
 
