@@ -14,6 +14,7 @@ namespace TabularForge.UI;
 public partial class App : Application
 {
     private ServiceProvider? _serviceProvider;
+    private static string? _daxHighlightingStatus;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -47,9 +48,8 @@ public partial class App : Application
 
         mainVm.AddMessage("TabularForge v6.0 started.");
         mainVm.AddMessage($"Runtime: .NET {Environment.Version}");
-        mainVm.AddMessage("Phase 6: Polish & Final loaded.");
-        mainVm.AddMessage("New: Translation Editor, Perspective Editor, Keyboard Shortcuts, Layout Persistence.");
-        mainVm.AddMessage("Previous: C# Script, BPA, Import, Diagram, Pivot, VertiPaq, Server, DAX.");
+        if (!string.IsNullOrEmpty(_daxHighlightingStatus))
+            mainVm.AddMessage(_daxHighlightingStatus);
         mainVm.AddMessage("Ready. Open a .bim file or connect to a server to begin.");
 
         mainWindow.Show();
@@ -98,6 +98,7 @@ public partial class App : Application
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "TabularForge.UI.SyntaxHighlighting.DAX.xshd";
+
             using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
@@ -105,6 +106,7 @@ public partial class App : Application
                 var definition = HighlightingLoader.Load(reader, HighlightingManager.Instance);
                 HighlightingManager.Instance.RegisterHighlighting(
                     "DAX", new[] { ".dax", ".msdax" }, definition);
+                _daxHighlightingStatus = $"DAX syntax highlighting loaded ({stream.Length} bytes).";
             }
             else
             {
@@ -118,12 +120,18 @@ public partial class App : Application
                     var definition = HighlightingLoader.Load(reader, HighlightingManager.Instance);
                     HighlightingManager.Instance.RegisterHighlighting(
                         "DAX", new[] { ".dax", ".msdax" }, definition);
+                    _daxHighlightingStatus = "DAX syntax highlighting loaded from file.";
+                }
+                else
+                {
+                    _daxHighlightingStatus = "DAX syntax highlighting: resource not found.";
                 }
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"DAX highlighting registration failed: {ex.Message}");
+            _daxHighlightingStatus = $"DAX highlighting FAILED: {ex.GetType().Name}: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine($"DAX highlighting registration failed: {ex}");
         }
     }
 

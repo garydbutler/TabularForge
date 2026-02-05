@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using AvalonDock;
@@ -65,6 +66,13 @@ public partial class MainWindow : Window
     {
         if (e.NewItems == null) return;
 
+        // Find the active document pane dynamically (may change after layout deserialization)
+        var docPane = DockManager.Layout.Descendents()
+            .OfType<LayoutDocumentPane>()
+            .FirstOrDefault();
+
+        if (docPane == null) return;
+
         foreach (DocumentTabViewModel tab in e.NewItems)
         {
             var layoutDoc = new LayoutDocument
@@ -74,8 +82,8 @@ public partial class MainWindow : Window
                 Content = CreateDocumentContent(tab)
             };
 
-            DocumentPane.Children.Add(layoutDoc);
-            DocumentPane.SelectedContentIndex = DocumentPane.Children.Count - 1;
+            docPane.Children.Add(layoutDoc);
+            docPane.SelectedContentIndex = docPane.Children.Count - 1;
         }
     }
 
@@ -211,10 +219,44 @@ public partial class MainWindow : Window
             };
             using var reader = new StringReader(layoutXml);
             serializer.Deserialize(reader);
+
+            // Ensure Welcome document exists after deserialization
+            EnsureWelcomeDocument();
         }
         catch
         {
             // If layout restore fails, keep the default layout
+        }
+    }
+
+    /// <summary>
+    /// Ensures the Welcome document exists in the document pane after layout deserialization.
+    /// The saved layout may have an empty LayoutDocumentPane that overwrites XAML-defined content.
+    /// </summary>
+    private void EnsureWelcomeDocument()
+    {
+        // Find the document pane (may be different after deserialization)
+        var docPane = DockManager.Layout.Descendents()
+            .OfType<LayoutDocumentPane>()
+            .FirstOrDefault();
+
+        if (docPane == null) return;
+
+        // Check if Welcome document already exists
+        var hasWelcome = docPane.Children.OfType<LayoutDocument>()
+            .Any(d => d.ContentId == "Welcome");
+
+        if (!hasWelcome)
+        {
+            var welcomeDoc = new LayoutDocument
+            {
+                Title = "Welcome",
+                ContentId = "Welcome",
+                CanClose = true,
+                Content = new WelcomePanel()
+            };
+            docPane.Children.Add(welcomeDoc);
+            docPane.SelectedContentIndex = docPane.Children.Count - 1;
         }
     }
 

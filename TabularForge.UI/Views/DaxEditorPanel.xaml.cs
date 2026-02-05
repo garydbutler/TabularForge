@@ -565,10 +565,34 @@ public partial class DaxEditorPanel : UserControl
         if (definition != null)
         {
             DaxEditor.SyntaxHighlighting = definition;
+            System.Diagnostics.Debug.WriteLine($"DAX highlighting applied successfully. Definition name: {definition.Name}");
         }
         else
         {
             System.Diagnostics.Debug.WriteLine("DAX highlighting not found in HighlightingManager. Was RegisterDaxHighlighting() called in App.OnStartup?");
+
+            // Try loading directly as fallback
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = "TabularForge.UI.SyntaxHighlighting.DAX.xshd";
+                using var stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
+                {
+                    using var reader = new XmlTextReader(stream);
+                    var def = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                    DaxEditor.SyntaxHighlighting = def;
+                    System.Diagnostics.Debug.WriteLine("DAX highlighting loaded directly from embedded resource as fallback.");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Embedded resource '{resourceName}' not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Fallback DAX highlighting load failed: {ex.Message}");
+            }
         }
     }
 

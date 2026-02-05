@@ -5,10 +5,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:TabularForge.Core.Models;assembly=TabularForge.Core"
              xmlns:conv="clr-namespace:TabularForge.UI.Converters"
+             xmlns:helpers="clr-namespace:TabularForge.UI.Helpers"
              mc:Ignorable="d"
+             x:Name="TomExplorerRoot"
              Background="{DynamicResource SideBarBackground}">
 
     <UserControl.Resources>
+        <!-- Binding proxy for context menu commands (context menus are outside visual tree) -->
+        <helpers:BindingProxy x:Key="ViewModelProxy" Data="{Binding}" />
+
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
         <conv:ObjectTypeToIconConverter x:Key="TypeToIcon" />
         <conv:ObjectTypeToColorConverter x:Key="TypeToColor" />
@@ -112,21 +117,21 @@
                             <ContextMenu Background="{DynamicResource PopupBackground}"
                                          Foreground="{DynamicResource PrimaryText}"
                                          BorderBrush="{DynamicResource PopupBorderBrush}">
-                                <MenuItem Header="Rename" Command="{Binding DataContext.RenameNodeCommand,
-                                    RelativeSource={RelativeSource AncestorType=Window}}"
+                                <MenuItem Header="Rename"
+                                          Command="{Binding Data.RenameNodeCommand, Source={StaticResource ViewModelProxy}}"
                                           InputGestureText="F2" />
-                                <MenuItem Header="Duplicate" Command="{Binding DataContext.DuplicateNodeCommand,
-                                    RelativeSource={RelativeSource AncestorType=Window}}" />
+                                <MenuItem Header="Duplicate"
+                                          Command="{Binding Data.DuplicateNodeCommand, Source={StaticResource ViewModelProxy}}" />
                                 <Separator />
-                                <MenuItem Header="Toggle Hidden" Command="{Binding DataContext.ToggleHiddenCommand,
-                                    RelativeSource={RelativeSource AncestorType=Window}}"
+                                <MenuItem Header="Toggle Hidden"
+                                          Command="{Binding Data.ToggleHiddenCommand, Source={StaticResource ViewModelProxy}}"
                                           InputGestureText="Ctrl+I" />
-                                <MenuItem Header="Show Dependencies" Command="{Binding DataContext.ShowDependenciesCommand,
-                                    RelativeSource={RelativeSource AncestorType=Window}}"
+                                <MenuItem Header="Show Dependencies"
+                                          Command="{Binding Data.ShowDependenciesCommand, Source={StaticResource ViewModelProxy}}"
                                           InputGestureText="Shift+F12" />
                                 <Separator />
-                                <MenuItem Header="Delete" Command="{Binding DataContext.DeleteNodeCommand,
-                                    RelativeSource={RelativeSource AncestorType=Window}}"
+                                <MenuItem Header="Delete"
+                                          Command="{Binding Data.DeleteNodeCommand, Source={StaticResource ViewModelProxy}}"
                                           InputGestureText="Del"
                                           Foreground="{DynamicResource ErrorText}" />
                             </ContextMenu>

@@ -14,18 +14,27 @@
   <Color name="Variable" foreground="#C586C0" />
 
   <RuleSet ignoreCase="true">
-    <!-- Comments -->
+    <!-- Single-line comments -->
     <Span color="Comment" begin="//" />
-    <Span color="Comment" multiline="true" begin="/\*" end="\*/" />
 
-    <!-- Strings -->
-    <Span color="String" begin="&quot;" end="&quot;" escapeCharacter="&quot;" />
+    <!-- Multi-line comments: /* ... */ -->
+    <Span color="Comment" multiline="true">
+      <Begin>/\*</Begin>
+      <End>\*/</End>
+    </Span>
+
+    <!-- Strings: "text" (DAX escapes quotes by doubling: "say ""hello""") -->
+    <Rule color="String">
+      "(?:[^"]|"")*"
+    </Rule>
 
     <!-- Table references: 'TableName' -->
     <Span color="TableRef" begin="'" end="'" />
 
     <!-- Column references: [ColumnName] -->
-    <Span color="ColumnRef" begin="\[" end="\]" />
+    <Rule color="ColumnRef">
+      \[[^\]]*\]
+    </Rule>
 
     <!-- Numbers -->
     <Rule color="Number">
@@ -299,7 +308,107 @@
       <Word>CONTAINSROW</Word>
       <Word>CONTAINSSTRING</Word>
       <Word>CONTAINSSTRINGEXACT</Word>
+      <Word>NAMEOF</Word>
+      <Word>COLUMNSTATISTICS</Word>
+      <Word>INFO</Word>
+      <Word>EVALUATEANDLOG</Word>
+      <Word>TOCSV</Word>
+      <Word>TOJSON</Word>
     </Keywords>
+
+    <!-- DAX Functions - Window (new) -->
+    <Keywords color="Function">
+      <Word>WINDOW</Word>
+      <Word>OFFSET</Word>
+      <Word>INDEX</Word>
+      <Word>ORDERBY</Word>
+      <Word>PARTITIONBY</Word>
+      <Word>MATCHBY</Word>
+      <Word>RANK</Word>
+      <Word>ROWNUMBER</Word>
+      <Word>MOVINGAVERAGE</Word>
+      <Word>RUNNINGSUM</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Financial -->
+    <Keywords color="Function">
+      <Word>XIRR</Word>
+      <Word>XNPV</Word>
+      <Word>PMT</Word>
+      <Word>PPMT</Word>
+      <Word>IPMT</Word>
+      <Word>PV</Word>
+      <Word>FV</Word>
+      <Word>NPER</Word>
+      <Word>RATE</Word>
+      <Word>SLN</Word>
+      <Word>SYD</Word>
+      <Word>DB</Word>
+      <Word>DDB</Word>
+      <Word>VDB</Word>
+      <Word>CUMIPMT</Word>
+      <Word>CUMPRINC</Word>
+      <Word>EFFECT</Word>
+      <Word>NOMINAL</Word>
+      <Word>DURATION</Word>
+      <Word>MDURATION</Word>
+      <Word>RECEIVED</Word>
+      <Word>YIELD</Word>
+      <Word>PRICE</Word>
+      <Word>DISC</Word>
+      <Word>INTRATE</Word>
+      <Word>NETWORKDAYS</Word>
+      <Word>WORKDAY</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Parent-Child -->
+    <Keywords color="Function">
+      <Word>PATHITEMREVERSE</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Statistical -->
+    <Keywords color="Function">
+      <Word>NORM.DIST</Word>
+      <Word>NORM.INV</Word>
+      <Word>NORM.S.DIST</Word>
+      <Word>NORM.S.INV</Word>
+      <Word>T.DIST</Word>
+      <Word>T.DIST.2T</Word>
+      <Word>T.DIST.RT</Word>
+      <Word>T.INV</Word>
+      <Word>T.INV.2T</Word>
+      <Word>CHISQ.DIST</Word>
+      <Word>CHISQ.DIST.RT</Word>
+      <Word>CHISQ.INV</Word>
+      <Word>CHISQ.INV.RT</Word>
+      <Word>CONFIDENCE.NORM</Word>
+      <Word>CONFIDENCE.T</Word>
+      <Word>EXPON.DIST</Word>
+      <Word>POISSON.DIST</Word>
+      <Word>PERMUT</Word>
+      <Word>COMBIN</Word>
+      <Word>COMBINA</Word>
+      <Word>BETA.DIST</Word>
+      <Word>BETA.INV</Word>
+      <Word>GAMMA.DIST</Word>
+      <Word>GAMMA.INV</Word>
+      <Word>LOGNORM.DIST</Word>
+      <Word>LOGNORM.INV</Word>
+    </Keywords>
+
+    <!-- DAX Functions - Bitwise -->
+    <Keywords color="Function">
+      <Word>BITAND</Word>
+      <Word>BITOR</Word>
+      <Word>BITXOR</Word>
+      <Word>BITLSHIFT</Word>
+      <Word>BITRSHIFT</Word>
+    </Keywords>
+
+    <!-- Operators - making them visible -->
+    <Rule color="Operator">
+      [+\-*/^=&lt;&gt;!&amp;|]+
+    </Rule>
 
   </RuleSet>
 </SyntaxDefinition>

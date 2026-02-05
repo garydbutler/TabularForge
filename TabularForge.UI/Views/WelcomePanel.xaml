@@ -3,12 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:helpers="clr-namespace:TabularForge.UI.Helpers"
              mc:Ignorable="d"
              Background="{DynamicResource EditorBackground}">
 
+    <UserControl.Resources>
+        <!-- Binding proxy to access MainWindow's DataContext through AvalonDock -->
+        <helpers:BindingProxy x:Key="MainViewModelProxy"
+                              Data="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" />
+    </UserControl.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top"
-                    MaxWidth="600" Margin="0,40,0,40">
+        <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                    Margin="60,40,60,40">
 
             <!-- Logo / Title -->
             <TextBlock Text="TabularForge" FontSize="36" FontWeight="Light"
@@ -29,9 +36,9 @@
                     <TextBlock Text="Get Started" FontSize="16" FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryText}"
                                Margin="0,0,0,12" />
-
-                    <Button Command="{Binding OpenFileCommand}" HorizontalAlignment="Left"
-                            Padding="12,8" Margin="0,4">
+    
+                    <Button Command="{Binding Data.OpenFileCommand, Source={StaticResource MainViewModelProxy}}"
+                            HorizontalAlignment="Left" Padding="12,8" Margin="0,4">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Open" FontSize="14" FontWeight="Bold"
                                        Foreground="{DynamicResource AccentBrush}"
@@ -46,8 +53,8 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Command="{Binding NewModelCommand}" HorizontalAlignment="Left"
-                            Padding="12,8" Margin="0,4">
+                    <Button Command="{Binding Data.NewModelCommand, Source={StaticResource MainViewModelProxy}}"
+                            HorizontalAlignment="Left" Padding="12,8" Margin="0,4">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="New" FontSize="14" FontWeight="Bold"
                                        Foreground="{DynamicResource AccentBrush}"
@@ -62,8 +69,8 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Command="{Binding ConnectToServerCommand}" HorizontalAlignment="Left"
-                            Padding="12,8" Margin="0,4">
+                    <Button Command="{Binding Data.ConnectToServerCommand, Source={StaticResource MainViewModelProxy}}"
+                            HorizontalAlignment="Left" Padding="12,8" Margin="0,4">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Svr" FontSize="14" FontWeight="Bold"
                                        Foreground="{DynamicResource AccentBrush}"
