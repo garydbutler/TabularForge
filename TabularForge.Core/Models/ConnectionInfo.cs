@@ -20,6 +20,8 @@ public class ConnectionInfo
     public string DatabaseName { get; set; } = string.Empty;
     public ServerType ServerType { get; set; } = ServerType.SSAS;
     public AuthenticationType AuthType { get; set; } = AuthenticationType.WindowsIntegrated;
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
     public string DisplayName => string.IsNullOrEmpty(DatabaseName)
         ? ServerAddress
         : $"{ServerAddress}\\{DatabaseName}";

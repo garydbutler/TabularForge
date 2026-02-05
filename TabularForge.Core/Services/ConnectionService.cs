@@ -17,7 +17,21 @@ public class ConnectionService : IDisposable
     // MSAL config for Azure AD
     private const string AzureAdClientId = "a672d62c-fc7b-4e81-a576-e60dc46e951d"; // common Power BI client
     private const string AzureAdAuthority = "https://login.microsoftonline.com/common";
+    private const string RedirectUri = "http://localhost";
     private static readonly string[] Scopes = new[] { "https://analysis.windows.net/powerbi/api/.default" };
+
+    // Persist MSAL app instance for token caching across calls
+    private IPublicClientApplication? _msalApp;
+    private IntPtr _parentWindowHandle;
+
+    /// <summary>
+    /// Set the parent window handle for MSAL interactive auth popups.
+    /// Call this from your MainWindow after it loads.
+    /// </summary>
+    public void SetParentWindow(IntPtr windowHandle)
+    {
+        _parentWindowHandle = windowHandle;
+    }
 
     public bool IsConnected => _isConnected;
     public ConnectionInfo? CurrentConnection => _currentConnection;
@@ -137,34 +151,59 @@ public class ConnectionService : IDisposable
             AuthenticationType.WindowsIntegrated =>
                 $"Provider=MSOLAP;Data Source={server};Integrated Security=SSPI;",
             AuthenticationType.AzureAD =>
-                $"Provider=MSOLAP;Data Source={server};Password={await GetAzureAdTokenAsync()};",
+                $"Provider=MSOLAP;Data Source={server};Password={await GetAzureAdTokenAsync()};Persist Security Info=True;Impersonation Level=Impersonate;",
             AuthenticationType.UsernamePassword =>
-                $"Provider=MSOLAP;Data Source={server};Integrated Security=SSPI;",
+                $"Provider=MSOLAP;Data Source={server};User ID={info.Username};Password={info.Password};Persist Security Info=True;",
             _ => $"Provider=MSOLAP;Data Source={server};Integrated Security=SSPI;"
         };
     }
 
+    private IPublicClientApplication GetOrCreateMsalApp()
+    {
+        if (_msalApp == null)
+        {
+            _msalApp = PublicClientApplicationBuilder
+                .Create(AzureAdClientId)
+                .WithAuthority(AzureAdAuthority)
+                .WithRedirectUri(RedirectUri)
+                .Build();
+        }
+        return _msalApp;
+    }
+
     private async Task<string> GetAzureAdTokenAsync()
     {
-        var app = PublicClientApplicationBuilder
-            .Create(AzureAdClientId)
-            .WithAuthority(AzureAdAuthority)
-            .WithDefaultRedirectUri()
-            .Build();
-
+        var app = GetOrCreateMsalApp();
         AuthenticationResult? result = null;
 
         try
         {
+            // Try silent auth first (cached token)
             var accounts = await app.GetAccountsAsync();
-            result = await app.AcquireTokenSilent(Scopes, accounts.FirstOrDefault())
-                .ExecuteAsync();
+            if (accounts.Any())
+            {
+                result = await app.AcquireTokenSilent(Scopes, accounts.FirstOrDefault())
+                    .ExecuteAsync();
+            }
+            else
+            {
+                throw new MsalUiRequiredException("no_account", "No cached account found.");
+            }
         }
         catch (MsalUiRequiredException)
         {
-            result = await app.AcquireTokenInteractive(Scopes)
+            // Interactive login required
+            var builder = app.AcquireTokenInteractive(Scopes)
                 .WithPrompt(Prompt.SelectAccount)
-                .ExecuteAsync();
+                .WithUseEmbeddedWebView(false); // Use system browser for reliability
+
+            // Set parent window so focus returns to app after browser auth
+            if (_parentWindowHandle != IntPtr.Zero)
+            {
+                builder = builder.WithParentActivityOrWindow(_parentWindowHandle);
+            }
+
+            result = await builder.ExecuteAsync();
         }
 
         return result.AccessToken;

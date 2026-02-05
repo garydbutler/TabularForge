@@ -20,6 +20,7 @@ public partial class MainViewModel : ObservableObject
     private readonly BimFileService _bimFileService;
     private readonly UndoRedoManager _undoRedoManager;
     private readonly ConnectionService _connectionService;
+    public ConnectionService ConnectionService => _connectionService;
     private readonly QueryService _queryService;
     private readonly RefreshService _refreshService;
     private readonly DeploymentService _deploymentService;
@@ -28,6 +29,9 @@ public partial class MainViewModel : ObservableObject
     private readonly ScriptingService _scriptingService;
     private readonly BpaService _bpaService;
     private readonly ImportService _importService;
+    private readonly TranslationService _translationService;
+    private readonly PerspectiveService _perspectiveService;
+    private readonly SettingsService _settingsService;
     private string? _currentFilePath;
 
     // === Model State ===
@@ -138,6 +142,16 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private BpaViewModel? _bpa;
+
+    // === Phase 6: Polish ViewModels ===
+
+    [ObservableProperty]
+    private TranslationEditorViewModel? _translationEditor;
+
+    [ObservableProperty]
+    private PerspectiveEditorViewModel? _perspectiveEditor;
+
+    public SettingsService SettingsService => _settingsService;
 
     // === Undo/Redo ===
 
@@ -1103,6 +1117,8 @@ public enum DocumentTabType
     VertiPaq,
     CSharpScript,
     BestPracticeAnalyzer,
+    TranslationEditor,
+    PerspectiveEditor,
     Welcome
 }
 

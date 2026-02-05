@@ -1,6 +1,8 @@
 using System.Windows;
+using System.Windows.Interop;
 using AvalonDock;
 using AvalonDock.Layout;
+using TabularForge.Core.Services;
 using TabularForge.UI.ViewModels;
 
 namespace TabularForge.UI.Views;
@@ -18,6 +20,23 @@ public partial class MainWindow : Window
 
         // Subscribe to DataContext changes to wire up ViewModel when it's set
         DataContextChanged += MainWindow_DataContextChanged;
+
+        // Pass window handle to ConnectionService for MSAL auth popups
+        Loaded += (_, _) =>
+        {
+            var handle = new WindowInteropHelper(this).Handle;
+            if (_viewModel != null)
+            {
+                var connectionService = GetConnectionService();
+                connectionService?.SetParentWindow(handle);
+            }
+        };
+    }
+
+    private ConnectionService? GetConnectionService()
+    {
+        // Access via DI - the MainViewModel has a reference
+        return _viewModel?.ConnectionService;
     }
 
     private void MainWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
