@@ -135,105 +135,160 @@
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
                 Padding="4,2">
             <StackPanel Orientation="Horizontal">
+                <!-- File Operations -->
                 <Button Command="{Binding NewModelCommand}" ToolTip="New Model (Ctrl+N)"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="+" FontSize="16" FontWeight="Bold" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="New" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenFileCommand}" ToolTip="Open File (Ctrl+O)"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Open" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Open" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding SaveFileCommand}" ToolTip="Save (Ctrl+S)"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Save" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Save" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
 
-                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
-                        Margin="6,2" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,4" />
 
+                <!-- Edit Operations -->
                 <Button Command="{Binding UndoCommand}" ToolTip="{Binding UndoDescription}"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Undo" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE7A7;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Undo" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding RedoCommand}" ToolTip="{Binding RedoDescription}"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Redo" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE7A6;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Redo" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
 
-                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
-                        Margin="6,2" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,4" />
 
+                <!-- DAX Tools -->
                 <Button Command="{Binding CheckDaxSemanticsCommand}" ToolTip="Check DAX Semantics"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Check" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Check" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenDaxScriptCommand}" ToolTip="DAX Script (Ctrl+Shift+D)"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Script" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE943;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Script" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
 
-                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
-                        Margin="6,2" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,4" />
 
+                <!-- Server Connection -->
                 <Button Command="{Binding ConnectToServerCommand}" ToolTip="Connect to Server"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Connect" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Connect" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding DisconnectCommand}" ToolTip="Disconnect"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Disconnect" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE8CD;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Disconnect" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
 
-                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
-                        Margin="6,2" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,4" />
 
+                <!-- Query and Deploy -->
                 <Button Command="{Binding OpenDaxQueryCommand}" ToolTip="DAX Query Editor"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Query" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Query" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenDeploymentWizardCommand}" ToolTip="Deploy Model"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Deploy" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE898;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Deploy" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
 
-                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
-                        Margin="6,2" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,4" />
 
+                <!-- Visual Tools -->
                 <Button Command="{Binding OpenDiagramCommand}" ToolTip="Diagram View"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Diagram" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Diagram" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenPivotGridCommand}" ToolTip="Pivot Grid"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Pivot" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE80A;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Pivot" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenVertiPaqCommand}" ToolTip="VertiPaq Analyzer"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="VertiPaq" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="VertiPaq" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
 
-                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
-                        Margin="6,2" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,4" />
 
+                <!-- Automation Tools -->
                 <Button Command="{Binding OpenCSharpScriptCommand}" ToolTip="C# Script Editor"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="C# Script" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE756;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="C#" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenBpaCommand}" ToolTip="Best Practice Analyzer"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="BPA" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="BPA" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
                 <Button Command="{Binding OpenImportWizardCommand}" ToolTip="Import Table"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Import" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Import" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
 
-                <Border Width="1" Background="{DynamicResource SeparatorBrush}"
-                        Margin="6,2" />
+                <Border Width="1" Background="{DynamicResource SeparatorBrush}" Margin="6,4" />
 
+                <!-- Settings -->
                 <Button Command="{Binding ToggleThemeCommand}" ToolTip="Toggle Dark/Light Theme"
-                        Padding="6,4" Margin="1,0">
-                    <TextBlock Text="Theme" FontSize="12" />
+                        Padding="8,4" Margin="1,0">
+                    <StackPanel>
+                        <TextBlock Text="&#xE793;" FontFamily="Segoe MDL2 Assets" FontSize="16" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Theme" FontSize="9" HorizontalAlignment="Center" Margin="0,-1,0,0"/>
+                    </StackPanel>
                 </Button>
             </StackPanel>
         </Border>

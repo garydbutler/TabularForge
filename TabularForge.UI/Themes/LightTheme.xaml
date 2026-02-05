@@ -1,85 +1,85 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ===== LIGHT THEME ===== -->
+    <!-- ===== LIGHT THEME (Clean, professional) ===== -->
 
     <!-- Core Background Colors -->
-    <SolidColorBrush x:Key="WindowBackground" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="WindowBackground" Color="#F5F5F5" />
     <SolidColorBrush x:Key="PanelBackground" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="SideBarBackground" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="SideBarBackground" Color="#F5F5F5" />
     <SolidColorBrush x:Key="EditorBackground" Color="#FFFFFF" />
     <SolidColorBrush x:Key="TabBarBackground" Color="#ECECEC" />
-    <SolidColorBrush x:Key="StatusBarBackground" Color="#007ACC" />
-    <SolidColorBrush x:Key="ToolBarBackground" Color="#ECECEC" />
-    <SolidColorBrush x:Key="MenuBarBackground" Color="#DDDDDD" />
+    <SolidColorBrush x:Key="StatusBarBackground" Color="#0077B6" />
+    <SolidColorBrush x:Key="ToolBarBackground" Color="#F0F0F0" />
+    <SolidColorBrush x:Key="MenuBarBackground" Color="#E8E8E8" />
 
     <!-- Text Colors -->
-    <SolidColorBrush x:Key="PrimaryText" Color="#333333" />
-    <SolidColorBrush x:Key="SecondaryText" Color="#717171" />
+    <SolidColorBrush x:Key="PrimaryText" Color="#2D2D2D" />
+    <SolidColorBrush x:Key="SecondaryText" Color="#6E6E6E" />
     <SolidColorBrush x:Key="ActiveText" Color="#000000" />
     <SolidColorBrush x:Key="DisabledText" Color="#A0A0A0" />
-    <SolidColorBrush x:Key="ErrorText" Color="#E51400" />
+    <SolidColorBrush x:Key="ErrorText" Color="#D32F2F" />
     <SolidColorBrush x:Key="WarningText" Color="#BF8803" />
-    <SolidColorBrush x:Key="InfoText" Color="#006AB1" />
+    <SolidColorBrush x:Key="InfoText" Color="#0077B6" />
 
     <!-- Border Colors -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#CCCCCC" />
-    <SolidColorBrush x:Key="FocusBorderBrush" Color="#007ACC" />
-    <SolidColorBrush x:Key="SeparatorBrush" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="BorderBrush" Color="#D0D0D0" />
+    <SolidColorBrush x:Key="FocusBorderBrush" Color="#0077B6" />
+    <SolidColorBrush x:Key="SeparatorBrush" Color="#D0D0D0" />
 
     <!-- Selection / Highlight -->
-    <SolidColorBrush x:Key="SelectionBrush" Color="#0060C0" />
-    <SolidColorBrush x:Key="HoverBrush" Color="#E8E8E8" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#0077B6" />
+    <SolidColorBrush x:Key="HoverBrush" Color="#0077B610" />
     <SolidColorBrush x:Key="ActiveTabBrush" Color="#FFFFFF" />
     <SolidColorBrush x:Key="InactiveTabBrush" Color="#ECECEC" />
-    <SolidColorBrush x:Key="HighlightBrush" Color="#ADD6FF" />
-    <SolidColorBrush x:Key="CurrentLineBrush" Color="#EFF2F7" />
+    <SolidColorBrush x:Key="HighlightBrush" Color="#C8E6F5" />
+    <SolidColorBrush x:Key="CurrentLineBrush" Color="#F0F4F8" />
 
     <!-- Accent Colors -->
-    <SolidColorBrush x:Key="AccentBrush" Color="#007ACC" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#1C97EA" />
-    <SolidColorBrush x:Key="SuccessBrush" Color="#008000" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#0077B6" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#0096D6" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#2E7D32" />
     <SolidColorBrush x:Key="WarningBrush" Color="#BF8803" />
-    <SolidColorBrush x:Key="ErrorBrush" Color="#E51400" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="#D32F2F" />
 
     <!-- TreeView Icon Colors -->
     <SolidColorBrush x:Key="ModelIconColor" Color="#B8860B" />
-    <SolidColorBrush x:Key="TableIconColor" Color="#008080" />
-    <SolidColorBrush x:Key="ColumnIconColor" Color="#0000CD" />
-    <SolidColorBrush x:Key="CalculatedColumnIconColor" Color="#800080" />
+    <SolidColorBrush x:Key="TableIconColor" Color="#00897B" />
+    <SolidColorBrush x:Key="ColumnIconColor" Color="#1565C0" />
+    <SolidColorBrush x:Key="CalculatedColumnIconColor" Color="#7B1FA2" />
     <SolidColorBrush x:Key="MeasureIconColor" Color="#B8860B" />
     <SolidColorBrush x:Key="HierarchyIconColor" Color="#CD853F" />
     <SolidColorBrush x:Key="RelationshipIconColor" Color="#4169E1" />
     <SolidColorBrush x:Key="FolderIconColor" Color="#DAA520" />
-    <SolidColorBrush x:Key="PartitionIconColor" Color="#228B22" />
-    <SolidColorBrush x:Key="RoleIconColor" Color="#E51400" />
-    <SolidColorBrush x:Key="PerspectiveIconColor" Color="#228B22" />
+    <SolidColorBrush x:Key="PartitionIconColor" Color="#2E7D32" />
+    <SolidColorBrush x:Key="RoleIconColor" Color="#D32F2F" />
+    <SolidColorBrush x:Key="PerspectiveIconColor" Color="#2E7D32" />
 
     <!-- Scrollbar -->
-    <SolidColorBrush x:Key="ScrollBarBackground" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="ScrollBarBackground" Color="#F5F5F5" />
     <SolidColorBrush x:Key="ScrollBarThumb" Color="#C1C1C1" />
     <SolidColorBrush x:Key="ScrollBarThumbHover" Color="#A0A0A0" />
 
     <!-- Data Grid Alternate Row -->
-    <SolidColorBrush x:Key="AlternateRowBackground" Color="#F5F5F5" />
+    <SolidColorBrush x:Key="AlternateRowBackground" Color="#F8F9FA" />
 
     <!-- Input Controls -->
     <SolidColorBrush x:Key="InputBackground" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="InputBorderBrush" Color="#CCCCCC" />
-    <SolidColorBrush x:Key="InputFocusBorderBrush" Color="#007ACC" />
-    <SolidColorBrush x:Key="InputText" Color="#333333" />
+    <SolidColorBrush x:Key="InputBorderBrush" Color="#D0D0D0" />
+    <SolidColorBrush x:Key="InputFocusBorderBrush" Color="#0077B6" />
+    <SolidColorBrush x:Key="InputText" Color="#2D2D2D" />
     <SolidColorBrush x:Key="InputPlaceholderText" Color="#A0A0A0" />
 
     <!-- Button -->
-    <SolidColorBrush x:Key="ButtonBackground" Color="#007ACC" />
-    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#1C97EA" />
+    <SolidColorBrush x:Key="ButtonBackground" Color="#0077B6" />
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#0096D6" />
     <SolidColorBrush x:Key="ButtonText" Color="#FFFFFF" />
     <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
 
     <!-- Context Menu / Popup -->
-    <SolidColorBrush x:Key="PopupBackground" Color="#F3F3F3" />
-    <SolidColorBrush x:Key="PopupBorderBrush" Color="#CCCCCC" />
-    <SolidColorBrush x:Key="MenuItemHoverBrush" Color="#C9DEF5" />
+    <SolidColorBrush x:Key="PopupBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="PopupBorderBrush" Color="#D0D0D0" />
+    <SolidColorBrush x:Key="MenuItemHoverBrush" Color="#0077B620" />
 
     <!-- ===== Global Control Styles ===== -->
 
@@ -151,22 +151,24 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
+                    <Border x:Name="ButtonBorder"
+                            Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
-                            CornerRadius="2">
+                            CornerRadius="3">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="#0077B615" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="#0077B630" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{StaticResource DisabledText}" />
+                            <Setter Property="Opacity" Value="0.5" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

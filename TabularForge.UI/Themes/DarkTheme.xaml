@@ -1,43 +1,45 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ===== DARK THEME (VS Code-like) ===== -->
+    <!-- ===== DARK THEME (VS Code + Tabular Editor inspired) ===== -->
 
     <!-- Core Background Colors -->
     <SolidColorBrush x:Key="WindowBackground" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="PanelBackground" Color="#252526" />
-    <SolidColorBrush x:Key="SideBarBackground" Color="#252526" />
+    <SolidColorBrush x:Key="PanelBackground" Color="#252530" />
+    <SolidColorBrush x:Key="SideBarBackground" Color="#252530" />
     <SolidColorBrush x:Key="EditorBackground" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="TabBarBackground" Color="#2D2D2D" />
-    <SolidColorBrush x:Key="StatusBarBackground" Color="#007ACC" />
-    <SolidColorBrush x:Key="ToolBarBackground" Color="#333333" />
-    <SolidColorBrush x:Key="MenuBarBackground" Color="#333333" />
+    <SolidColorBrush x:Key="TabBarBackground" Color="#2D2D35" />
+    <SolidColorBrush x:Key="StatusBarBackground" Color="#00B4D8" />
+    <SolidColorBrush x:Key="MenuBarBackground" Color="#2D2D35" />
+
+    <!-- Toolbar with subtle accent gradient -->
+    <SolidColorBrush x:Key="ToolBarBackground" Color="#2B2B35" />
 
     <!-- Text Colors -->
-    <SolidColorBrush x:Key="PrimaryText" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="PrimaryText" Color="#D4D4D4" />
     <SolidColorBrush x:Key="SecondaryText" Color="#858585" />
     <SolidColorBrush x:Key="ActiveText" Color="#FFFFFF" />
     <SolidColorBrush x:Key="DisabledText" Color="#5A5A5A" />
     <SolidColorBrush x:Key="ErrorText" Color="#F44747" />
     <SolidColorBrush x:Key="WarningText" Color="#CCA700" />
-    <SolidColorBrush x:Key="InfoText" Color="#3794FF" />
+    <SolidColorBrush x:Key="InfoText" Color="#48B9F0" />
 
     <!-- Border Colors -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#3C3C3C" />
-    <SolidColorBrush x:Key="FocusBorderBrush" Color="#007ACC" />
-    <SolidColorBrush x:Key="SeparatorBrush" Color="#3C3C3C" />
+    <SolidColorBrush x:Key="BorderBrush" Color="#3C3C4A" />
+    <SolidColorBrush x:Key="FocusBorderBrush" Color="#00B4D8" />
+    <SolidColorBrush x:Key="SeparatorBrush" Color="#3C3C4A" />
 
     <!-- Selection / Highlight -->
-    <SolidColorBrush x:Key="SelectionBrush" Color="#094771" />
-    <SolidColorBrush x:Key="HoverBrush" Color="#2A2D2E" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#0A4A6E" />
+    <SolidColorBrush x:Key="HoverBrush" Color="#00B4D820" />
     <SolidColorBrush x:Key="ActiveTabBrush" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="InactiveTabBrush" Color="#2D2D2D" />
+    <SolidColorBrush x:Key="InactiveTabBrush" Color="#2D2D35" />
     <SolidColorBrush x:Key="HighlightBrush" Color="#264F78" />
-    <SolidColorBrush x:Key="CurrentLineBrush" Color="#282828" />
+    <SolidColorBrush x:Key="CurrentLineBrush" Color="#282838" />
 
     <!-- Accent Colors -->
-    <SolidColorBrush x:Key="AccentBrush" Color="#007ACC" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#1C97EA" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#00B4D8" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#48CAE4" />
     <SolidColorBrush x:Key="SuccessBrush" Color="#4EC9B0" />
     <SolidColorBrush x:Key="WarningBrush" Color="#CE9178" />
     <SolidColorBrush x:Key="ErrorBrush" Color="#F44747" />
@@ -57,29 +59,29 @@
 
     <!-- Scrollbar -->
     <SolidColorBrush x:Key="ScrollBarBackground" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="ScrollBarThumb" Color="#424242" />
-    <SolidColorBrush x:Key="ScrollBarThumbHover" Color="#4F4F4F" />
+    <SolidColorBrush x:Key="ScrollBarThumb" Color="#424250" />
+    <SolidColorBrush x:Key="ScrollBarThumbHover" Color="#4F4F5F" />
+
+    <!-- Data Grid Alternate Row -->
+    <SolidColorBrush x:Key="AlternateRowBackground" Color="#252530" />
 
     <!-- Input Controls -->
-    <!-- Data Grid Alternate Row -->
-    <SolidColorBrush x:Key="AlternateRowBackground" Color="#252526" />
-
-    <SolidColorBrush x:Key="InputBackground" Color="#3C3C3C" />
-    <SolidColorBrush x:Key="InputBorderBrush" Color="#3C3C3C" />
-    <SolidColorBrush x:Key="InputFocusBorderBrush" Color="#007ACC" />
-    <SolidColorBrush x:Key="InputText" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="InputBackground" Color="#333340" />
+    <SolidColorBrush x:Key="InputBorderBrush" Color="#3C3C4A" />
+    <SolidColorBrush x:Key="InputFocusBorderBrush" Color="#00B4D8" />
+    <SolidColorBrush x:Key="InputText" Color="#D4D4D4" />
     <SolidColorBrush x:Key="InputPlaceholderText" Color="#5A5A5A" />
 
     <!-- Button -->
-    <SolidColorBrush x:Key="ButtonBackground" Color="#0E639C" />
-    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#1177BB" />
+    <SolidColorBrush x:Key="ButtonBackground" Color="#00839E" />
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#00A0C0" />
     <SolidColorBrush x:Key="ButtonText" Color="#FFFFFF" />
     <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
 
     <!-- Context Menu / Popup -->
-    <SolidColorBrush x:Key="PopupBackground" Color="#252526" />
-    <SolidColorBrush x:Key="PopupBorderBrush" Color="#454545" />
-    <SolidColorBrush x:Key="MenuItemHoverBrush" Color="#094771" />
+    <SolidColorBrush x:Key="PopupBackground" Color="#252530" />
+    <SolidColorBrush x:Key="PopupBorderBrush" Color="#454555" />
+    <SolidColorBrush x:Key="MenuItemHoverBrush" Color="#00B4D830" />
 
     <!-- ===== Global Control Styles ===== -->
 
@@ -101,7 +103,7 @@
         <Setter Property="Padding" Value="2,1" />
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                <Setter Property="Background" Value="#00B4D830" />
                 <Setter Property="Foreground" Value="{StaticResource ActiveText}" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
@@ -158,22 +160,24 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
+                    <Border x:Name="ButtonBorder"
+                            Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
-                            CornerRadius="2">
+                            CornerRadius="3">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="#00B4D820" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="#00B4D840" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{StaticResource DisabledText}" />
+                            <Setter Property="Opacity" Value="0.5" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

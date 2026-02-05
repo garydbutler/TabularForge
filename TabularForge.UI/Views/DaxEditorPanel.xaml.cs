@@ -125,28 +125,29 @@ public partial class DaxEditorPanel : UserControl
 
     private void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
     {
-        if (e.Text == "(" || e.Text == "[" || e.Text == "'" || e.Text == ".")
+        if (e.Text == "[" || e.Text == "'" || e.Text == ".")
         {
+            // Immediately show completions for column refs, table refs, and dot access
             ShowCompletionWindow();
+        }
+        else if (e.Text == "(")
+        {
+            // Close existing completion on opening paren (function call started)
+            _completionWindow?.Close();
         }
         else if (e.Text.Length == 1 && char.IsLetter(e.Text[0]))
         {
-            // Start auto-complete after typing a few characters
-            var offset = DaxEditor.TextArea.Caret.Offset;
-            int wordStart = offset - 1;
-            var text = DaxEditor.Text;
-            while (wordStart > 0 && (char.IsLetterOrDigit(text[wordStart - 1]) || text[wordStart - 1] == '_'))
-                wordStart--;
-            if (offset - wordStart >= 2) // After 2+ chars
-            {
-                ShowCompletionWindow();
-            }
+            // Show auto-complete after typing first letter
+            ShowCompletionWindow();
         }
     }
 
     private void ShowCompletionWindow()
     {
         if (_completionProvider == null) return;
+
+        // Refresh model info from the ViewModel before showing completions
+        EnsureModelInfo();
 
         var offset = DaxEditor.TextArea.Caret.Offset;
         var completions = _completionProvider.GetCompletions(DaxEditor.Document, offset, out int startOffset);
@@ -164,11 +165,55 @@ public partial class DaxEditorPanel : UserControl
             CloseWhenCaretAtBeginning = true
         };
 
+        // Style the CompletionWindow for dark/light theme
+        StyleCompletionWindow(_completionWindow);
+
         foreach (var item in completions)
             _completionWindow.CompletionList.CompletionData.Add(item);
 
         _completionWindow.Show();
         _completionWindow.Closed += (_, _) => _completionWindow = null;
+    }
+
+    private void EnsureModelInfo()
+    {
+        var vm = DataContext as MainViewModel
+            ?? (Application.Current.MainWindow?.DataContext as MainViewModel);
+        if (vm?.IsModelLoaded == true && _completionProvider != null)
+        {
+            var modelInfo = vm.BuildModelInfo();
+            if (modelInfo.Tables.Count > 0)
+                _completionProvider = new DaxCompletionProvider(modelInfo);
+        }
+    }
+
+    private static void StyleCompletionWindow(CompletionWindow window)
+    {
+        // Apply theme-aware colors to the CompletionWindow popup
+        var popupBg = Application.Current.TryFindResource("PopupBackground") as SolidColorBrush;
+        var popupBorder = Application.Current.TryFindResource("PopupBorderBrush") as SolidColorBrush;
+        var primaryText = Application.Current.TryFindResource("PrimaryText") as SolidColorBrush;
+
+        if (popupBg != null)
+        {
+            window.Background = popupBg;
+            window.CompletionList.Background = popupBg;
+            window.CompletionList.ListBox.Background = popupBg;
+        }
+        if (popupBorder != null)
+        {
+            window.BorderBrush = popupBorder;
+            window.BorderThickness = new Thickness(1);
+        }
+        if (primaryText != null)
+        {
+            window.Foreground = primaryText;
+            window.CompletionList.Foreground = primaryText;
+            window.CompletionList.ListBox.Foreground = primaryText;
+        }
+
+        window.MinWidth = 280;
+        window.MaxHeight = 300;
     }
 
     public void UpdateModelInfo(ModelInfo modelInfo)

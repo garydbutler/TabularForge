@@ -327,7 +327,50 @@ public sealed class DaxCompletionData : ICompletionData
 
     public ImageSource? Image => null;
     public string Text { get; }
-    public object Content => Text;
+
+    public object Content
+    {
+        get
+        {
+            var prefix = _kind switch
+            {
+                CompletionItemKind.Function => "f(x)",
+                CompletionItemKind.Table => "TBL",
+                CompletionItemKind.Column => "COL",
+                CompletionItemKind.Measure => "[ ]",
+                CompletionItemKind.Keyword => "KEY",
+                _ => ""
+            };
+
+            var color = _kind switch
+            {
+                CompletionItemKind.Function => Colors.MediumPurple,
+                CompletionItemKind.Table => Colors.MediumAquamarine,
+                CompletionItemKind.Column => Colors.CornflowerBlue,
+                CompletionItemKind.Measure => Colors.Goldenrod,
+                CompletionItemKind.Keyword => Colors.IndianRed,
+                _ => Colors.Gray
+            };
+
+            var panel = new System.Windows.Controls.StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal };
+            panel.Children.Add(new System.Windows.Controls.TextBlock
+            {
+                Text = prefix,
+                FontSize = 10,
+                Width = 30,
+                Foreground = new SolidColorBrush(color),
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Margin = new System.Windows.Thickness(0, 0, 4, 0)
+            });
+            panel.Children.Add(new System.Windows.Controls.TextBlock
+            {
+                Text = Text,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            });
+            return panel;
+        }
+    }
+
     public object Description { get; }
 
     public double Priority => _kind switch
